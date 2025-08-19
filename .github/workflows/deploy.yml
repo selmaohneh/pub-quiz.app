@@ -45,8 +45,7 @@ jobs:
     - name: Add .nojekyll file
       run: touch dist/wwwroot/.nojekyll
       
-    - name: Add 404.html for client-side routing
-      run: cp dist/wwwroot/index.html dist/wwwroot/404.html
+    # 404.html is already included in the build, no need to copy
       
     - name: Setup Pages
       uses: actions/configure-pages@v4
