@@ -55,18 +55,27 @@
                 initAudioContext();
                 // Remove listeners after first interaction
                 document.removeEventListener('touchstart', initAudioOnInteraction);
+                document.removeEventListener('touchend', initAudioOnInteraction);
                 document.removeEventListener('click', initAudioOnInteraction);
+                document.removeEventListener('keydown', initAudioOnInteraction);
             }
         };
 
-        // Add listeners for mobile browsers
+        // Add listeners for mobile browsers - more comprehensive coverage
         document.addEventListener('touchstart', initAudioOnInteraction);
+        document.addEventListener('touchend', initAudioOnInteraction);
         document.addEventListener('click', initAudioOnInteraction);
+        document.addEventListener('keydown', initAudioOnInteraction);
 
         window.playCorrectSound = () => {
             try {
                 if (!audioContext) {
                     initAudioContext();
+                }
+
+                // Ensure audio context is running (critical for mobile)
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
                 }
 
                 // Create new oscillator for each sound (they can only be used once)
@@ -96,6 +105,11 @@
                     initAudioContext();
                 }
 
+                // Ensure audio context is running (critical for mobile)
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+
                 // Create new oscillator for each sound (they can only be used once)
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
@@ -120,6 +134,11 @@
             try {
                 if (!audioContext) {
                     initAudioContext();
+                }
+
+                // Ensure audio context is running (critical for mobile)
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
                 }
 
                 // Create a distinctive "ding" sound for range updates
