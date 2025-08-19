@@ -190,6 +190,7 @@
             }
 
             InitializeGame();
+            await TrackSortQuizStarted();
         }
         catch (Exception ex)
         {
@@ -475,6 +476,18 @@
         if (fileInput != null)
         {
             await JSRuntime.InvokeVoidAsync("triggerFileInput", fileInput.Element);
+        }
+    }
+
+    private async Task TrackSortQuizStarted()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("trackPlausibleEvent", "sort-quiz-started", new { });
+        }
+        catch
+        {
+            // Analytics tracking failed, continue silently
         }
     }
 
