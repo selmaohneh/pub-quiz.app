@@ -80,6 +80,51 @@
         window.triggerFileInput = (element) => {
             element.click();
         };
+
+        window.selectAllText = (elementId) => {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.select();
+            }
+        };
+
+        window.focusAndSelectInput = (elementId) => {
+            setTimeout(() => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.focus();
+                    // Don't select all text to allow normal typing
+                    element.setSelectionRange(element.value.length, element.value.length);
+                }
+            }, 100);
+        };
+
+        let yearQuizComponent = null;
+        let keyboardListener = null;
+
+        window.addKeyboardListeners = (component) => {
+            yearQuizComponent = component;
+            keyboardListener = (event) => {
+                if (event.key === ' ' || event.key === 'Enter') {
+                    // Prevent default behavior for space (scrolling) and enter
+                    if (event.key === ' ' && event.target.tagName !== 'INPUT') {
+                        event.preventDefault();
+                    }
+                    if (yearQuizComponent) {
+                        yearQuizComponent.invokeMethodAsync('HandleKeyPress', event.key);
+                    }
+                }
+            };
+            document.addEventListener('keydown', keyboardListener);
+        };
+
+        window.removeKeyboardListeners = () => {
+            if (keyboardListener) {
+                document.removeEventListener('keydown', keyboardListener);
+                keyboardListener = null;
+            }
+            yearQuizComponent = null;
+        };
     </script>
 </body>
 

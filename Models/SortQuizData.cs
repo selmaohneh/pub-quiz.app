@@ -36,3 +36,41 @@ public class TimelineSlot
     public string? Item { get; set; }
     public bool IsCorrect { get; set; }
 }
+
+// Year Quiz Models
+public class YearQuizData
+{
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = string.Empty;
+
+    [JsonPropertyName("_hint")]
+    public string Hint { get; set; } = string.Empty;
+
+    [JsonPropertyName("items")]
+    public List<YearQuizItem> Items { get; set; } = new();
+}
+
+public class YearQuizItem
+{
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = string.Empty;
+
+    [JsonPropertyName("year")]
+    public int Year { get; set; }
+}
+
+public class YearGameState
+{
+    public List<YearQuizItem> Items { get; set; } = new();
+    public YearQuizItem? CurrentItem { get; set; }
+    public int CurrentItemIndex { get; set; }
+    public int CurrentRange { get; set; } = 0;
+    public bool GameStarted { get; set; }
+    public bool GameStopped { get; set; }
+    public bool GameEnded { get; set; }
+    public bool GameWon { get; set; }
+    public int PlayerGuess { get; set; }
+    public DateTime GameStartTime { get; set; }
+    public DateTime LastRangeUpdateTime { get; set; }
+    public double ProgressPercentage { get; set; }
+}
