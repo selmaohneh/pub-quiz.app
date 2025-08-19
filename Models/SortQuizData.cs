@@ -73,4 +73,6 @@ public class YearGameState
     public DateTime GameStartTime { get; set; }
     public DateTime LastRangeUpdateTime { get; set; }
     public double ProgressPercentage { get; set; }
+    public int SecondsUntilRangeIncrease { get; set; } = 10;
+    public bool RangeJustUpdated { get; set; }
 }

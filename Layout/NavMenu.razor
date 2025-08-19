@@ -8,19 +8,26 @@
 </div>
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-    <nav class="flex-column" style="height: 100%; position: relative;">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="sort-quiz">
-                📋 Sort Quiz
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="year-quiz">
-                📅 Year Quiz
-            </NavLink>
+    <nav class="flex-column nav-menu-content">
+        <!-- Quiz Links -->
+        <div class="nav-section">
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="sort-quiz">
+                    📋 Sort Quiz
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="year-quiz">
+                    📅 Year Quiz
+                </NavLink>
+            </div>
         </div>
         
-        <div style="position: absolute; bottom: 0; width: 100%;">
+        <!-- Horizontal Divider -->
+        <div class="nav-divider"></div>
+        
+        <!-- Legal Links -->
+        <div class="nav-section">
             <div class="nav-item px-3">
                 <a class="nav-link" href="https://github.com/selmaohneh/pub-quiz.app/blob/master/PRIVACY.md" target="_blank">
                     🔒 Privacy Policy

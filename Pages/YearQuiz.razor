@@ -69,7 +69,7 @@
         @if (!_gameState.GameEnded && !_gameState.GameStopped)
         {
             <div class="year-game-container">
-                <div class="range-display">
+                <div class="range-display @(_gameState.RangeJustUpdated ? "range-updated" : "")">
                     <h3>±@_gameState.CurrentRange</h3>
                 </div>
                 
@@ -77,9 +77,9 @@
                     <h1>@_gameState.CurrentItem?.Title</h1>
                 </div>
                 
-                <div class="progress-container">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: @(_gameState.ProgressPercentage)%"></div>
+                <div class="countdown-container">
+                    <div class="countdown-text">
+                        Range increases in <span class="countdown-seconds">@_gameState.SecondsUntilRangeIncrease</span>s
                     </div>
                 </div>
                 
@@ -179,28 +179,21 @@
         line-height: 1.2;
     }
 
-    .progress-container {
+    .countdown-container {
         width: 100%;
         max-width: 600px;
         text-align: center;
+        margin-top: 1rem;
     }
 
-
-
-    .progress-bar {
-        width: 100%;
-        height: 20px;
-        background-color: #e9ecef;
-        border-radius: 0;
-        overflow: hidden;
-        margin-bottom: 0.5rem;
+    .countdown-text {
+        font-size: 1.5rem;
+        color: #6c757d;
+        font-weight: bold;
     }
 
-    .progress-fill {
-        height: 100%;
-        background: #007bff;
-        transition: width 0.25s ease-out;
-        will-change: width;
+    .countdown-seconds {
+        color: #007bff;
     }
 
     .stop-button-container {
@@ -282,7 +275,9 @@
         font-size: 1.1rem;
     }
 
-
+    .range-updated {
+        animation: pulse 1s ease-in-out;
+    }
 
     .next-buttons {
         display: flex;
@@ -456,13 +451,13 @@
         var timeSinceLastUpdate = now - _gameState.LastRangeUpdateTime;
         var totalSeconds = timeSinceLastUpdate.TotalSeconds;
 
-        // Update progress percentage (0-100 over 10 seconds) with smoother calculation
-        var newProgressPercentage = Math.Min(100, (totalSeconds / 10.0) * 100);
+        // Calculate seconds until next range increase
+        _gameState.SecondsUntilRangeIncrease = Math.Max(0, 10 - (int)Math.Floor(totalSeconds));
         
-        // Only update if there's a meaningful change to reduce unnecessary re-renders
-        if (Math.Abs(newProgressPercentage - _gameState.ProgressPercentage) > 0.5)
+        // Clear the range update animation flag after a short delay
+        if (_gameState.RangeJustUpdated && totalSeconds > 1.0)
         {
-            _gameState.ProgressPercentage = newProgressPercentage;
+            _gameState.RangeJustUpdated = false;
         }
 
         // Check if we need to increase the range
@@ -483,7 +478,9 @@
             var nextRange = GetNextRange(_gameState.CurrentRange);
             _gameState.CurrentRange = nextRange;
             _gameState.LastRangeUpdateTime = now;
-            _gameState.ProgressPercentage = 0;
+            _gameState.SecondsUntilRangeIncrease = 10; // Reset countdown
+            _gameState.RangeJustUpdated = true; // Set flag for animation
+            await PlayRangeUpdateSound(); // Play sound for range update
         }
 
         await InvokeAsync(StateHasChanged);
@@ -520,6 +517,18 @@
         {
             // At 1000, stay at 1000 (game will end on next update)
             return 1000;
+        }
+    }
+
+    private async Task PlayRangeUpdateSound()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("playRangeUpdateSound");
+        }
+        catch
+        {
+            // Sound playback failed, continue silently
         }
     }
 
