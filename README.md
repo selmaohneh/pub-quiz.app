@@ -2,7 +2,7 @@
 
 A fun, interactive web application for hosting pub quizzes with friends! Create custom quizzes and challenge your knowledge with two exciting game modes.
 
-🎮 **[Play Now](https://pub-quiz.io)** | 🔒 **[Privacy Policy](PRIVACY.md)**
+🎮 **[Play Now](https://www.pub-quiz.app)** | 🔒 **[Privacy Policy](PRIVACY.md)**
 
 ## 🎯 Game Modes
 
