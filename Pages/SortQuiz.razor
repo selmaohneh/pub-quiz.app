@@ -1,0 +1,437 @@
+@page "/sort-quiz"
+@using pub_quiz.Models
+@using System.Text.Json
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Sort Quiz - pub-quiz.app</PageTitle>
+
+<div class="sort-quiz-container">
+    @if (_quizData == null)
+    {
+        <div class="file-upload">
+            <h2>Sort Quiz</h2>
+            <p>Upload your quiz JSON file to start playing!</p>
+            
+            <div class="upload-section">
+                <button class="btn btn-secondary" @onclick="DownloadTemplate">Download Template</button>
+                <div class="mt-3">
+                    <InputFile OnChange="HandleFileUpload" accept=".json" />
+                </div>
+            </div>
+            
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="alert alert-danger mt-3">@_errorMessage</div>
+            }
+        </div>
+    }
+    else
+    {
+        <h2 class="game-title">@_quizData.Title</h2>
+        
+        @if (!_gameState.GameEnded)
+        {
+            <div class="game-container">
+                <div class="items-panel">
+                    <h4>Available Items</h4>
+                    @foreach (var item in _gameState.RemainingItems)
+                    {
+                        <div class="item-card" 
+                             draggable="true" 
+                             @ondragstart="() => StartDrag(item)"
+                             @onclick="() => SelectItem(item)">
+                            @item
+                        </div>
+                    }
+                </div>
+                
+                <div class="sorting-panel">
+                    <h4>Sorting Area</h4>
+                    <div class="sorting-container">
+                        <div class="sorting-label-top">@_quizData.UpperLabel</div>
+                        @for (int i = 0; i < _gameState.Timeline.Count; i++)
+                        {
+                            var slot = _gameState.Timeline[i];
+                            var index = i; // Capture the index in a local variable
+                            <div class="sorting-item">
+                                <div class="sorting-slot @(slot.Item != null ? "filled" : "") @(_selectedItem != null && slot.Item == null ? "drop-target" : "")"
+                                     @ondragover="PreventDefault"
+                                     @ondragover:preventDefault="true"
+                                     @ondrop="() => DropItem(index)"
+                                     @onclick="() => PlaceItem(index)">
+                                    @if (slot.Item != null)
+                                    {
+                                        <span>@slot.Item</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="slot-number">@(GetEmptySlotNumber(index))</span>
+                                        @if (_selectedItem != null)
+                                        {
+                                            <span class="drop-hint">Drop here</span>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        }
+                        <div class="sorting-label-bottom">@_quizData.LowerLabel</div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="game-result @(_gameState.GameWon ? "success" : "failure")">
+                <h3>@(_gameState.GameWon ? "Congratulations! 🎉" : "Game Over 😔")</h3>
+                <p>@(_gameState.GameWon ? "You sorted all items correctly!" : "You made an incorrect placement.")</p>
+                
+                <div class="result-sorting-area">
+                    <h4>Correct Order:</h4>
+                    <div class="sorting-container">
+                        <div class="sorting-label-top">@_quizData.UpperLabel</div>
+                        @for (int i = 0; i < _gameState.CorrectOrder.Count; i++)
+                        {
+                            var item = _gameState.CorrectOrder[i];
+                            var itemColor = GetResultItemColor(item);
+                            <div class="sorting-item">
+                                <div class="result-slot @itemColor">
+                                    <span>@item</span>
+                                </div>
+                            </div>
+                        }
+                        <div class="sorting-label-bottom">@_quizData.LowerLabel</div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary mt-3" @onclick="ResetGame">Play Again</button>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private SortQuizData? _quizData;
+    private GameState _gameState = new();
+    private string _errorMessage = string.Empty;
+    private string? _selectedItem;
+    private string? _draggedItem;
+    private string? _incorrectlyPlacedItem;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        _errorMessage = string.Empty;
+        
+        try
+        {
+            var file = e.File;
+            if (file.Size > 1024 * 1024) // 1MB limit
+            {
+                _errorMessage = "File size must be less than 1MB.";
+                return;
+            }
+
+            using var stream = file.OpenReadStream();
+            using var reader = new StreamReader(stream);
+            var content = await reader.ReadToEndAsync();
+            
+            _quizData = JsonSerializer.Deserialize<SortQuizData>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (_quizData == null)
+            {
+                _errorMessage = "Invalid JSON format.";
+                return;
+            }
+
+            if (_quizData.Items.Count < 2)
+            {
+                _errorMessage = "Quiz must have at least 2 items.";
+                return;
+            }
+
+            InitializeGame();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error loading file: {ex.Message}";
+        }
+    }
+
+    private void InitializeGame()
+    {
+        if (_quizData == null) return;
+
+        // Take max 20 items and shuffle
+        var itemsToUse = _quizData.Items.Take(20).ToList();
+        var random = new Random();
+        
+        // Shuffle items
+        for (int i = itemsToUse.Count - 1; i > 0; i--)
+        {
+            int j = random.Next(i + 1);
+            (itemsToUse[i], itemsToUse[j]) = (itemsToUse[j], itemsToUse[i]);
+        }
+
+        _gameState = new GameState
+        {
+            RemainingItems = itemsToUse.Skip(1).ToList(), // All except one
+            CorrectOrder = _quizData.Items.Take(20).ToList(), // Original order is correct
+            Timeline = new List<TimelineSlot> 
+            { 
+                new() { Position = 0, Item = null }, // Empty slot above
+                new() { Position = 1, Item = itemsToUse.First() }, // Starting item
+                new() { Position = 2, Item = null } // Empty slot below
+            }
+        };
+        
+        // Shuffle remaining items
+        for (int i = _gameState.RemainingItems.Count - 1; i > 0; i--)
+        {
+            int j = random.Next(i + 1);
+            (_gameState.RemainingItems[i], _gameState.RemainingItems[j]) = (_gameState.RemainingItems[j], _gameState.RemainingItems[i]);
+        }
+    }
+
+    private void SelectItem(string item)
+    {
+        _selectedItem = _selectedItem == item ? null : item;
+    }
+
+    private void StartDrag(string item)
+    {
+        _draggedItem = item;
+    }
+
+    private void PreventDefault(DragEventArgs e)
+    {
+        // This method is used for ondragover events to allow drops
+    }
+
+    private async Task DropItem(int position)
+    {
+        if (_draggedItem != null)
+        {
+            await PlaceItemAtPosition(_draggedItem, position);
+            _draggedItem = null;
+        }
+    }
+
+    private async Task PlaceItem(int position)
+    {
+        if (_selectedItem != null)
+        {
+            await PlaceItemAtPosition(_selectedItem, position);
+            _selectedItem = null;
+        }
+    }
+
+    private async Task PlaceItemAtPosition(string item, int position)
+    {
+        if (_gameState.GameEnded) return;
+        
+        // Bounds check
+        if (position < 0 || position >= _gameState.Timeline.Count) return;
+        
+        // Only allow placement in empty slots
+        if (_gameState.Timeline[position].Item != null) return;
+
+        // Check if placement is correct
+        var isCorrectPosition = IsCorrectPlacement(item, position);
+
+        if (isCorrectPosition)
+        {
+            // Correct placement
+            await PlaySound("correct");
+            
+            // Replace the empty slot with the placed item
+            _gameState.Timeline[position].Item = item;
+            _gameState.Timeline[position].IsCorrect = true;
+            _gameState.RemainingItems.Remove(item);
+            _gameState.PlayerOrder.Add(item);
+
+            // Add new empty slots around the placed item
+            AddNewSlots(position);
+
+            // Check if game is won
+            if (_gameState.RemainingItems.Count == 0)
+            {
+                _gameState.GameEnded = true;
+                _gameState.GameWon = true;
+            }
+        }
+        else
+        {
+            // Incorrect placement
+            await PlaySound("incorrect");
+            _incorrectlyPlacedItem = item; // Track the item that was placed incorrectly
+            _gameState.GameEnded = true;
+            _gameState.GameWon = false;
+        }
+
+        StateHasChanged();
+    }
+
+    private bool IsCorrectPlacement(string item, int position)
+    {
+        // Bounds check
+        if (position < 0 || position >= _gameState.Timeline.Count) return false;
+        
+        // Create a temporary timeline with the new item placed
+        var tempTimeline = _gameState.Timeline.ToList();
+        tempTimeline[position].Item = item;
+        
+        // Get all placed items in order (ignoring empty slots)
+        var placedItems = tempTimeline.Where(slot => slot.Item != null).Select(slot => slot.Item!).ToList();
+        
+        // Check if placed items appear in the same order as the correct order
+        // (allowing for missing items that haven't been placed yet)
+        return IsSubsequenceInOrder(placedItems, _gameState.CorrectOrder);
+    }
+    
+    private bool IsSubsequenceInOrder(List<string> placedItems, List<string> correctOrder)
+    {
+        int correctIndex = 0;
+        
+        foreach (var placedItem in placedItems)
+        {
+            // Find this item in the correct order, starting from where we left off
+            bool found = false;
+            for (int i = correctIndex; i < correctOrder.Count; i++)
+            {
+                if (correctOrder[i] == placedItem)
+                {
+                    correctIndex = i + 1; // Move past this item for next search
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found)
+            {
+                return false; // Item is out of order
+            }
+        }
+        
+        return true; // All items are in correct relative order
+    }
+
+    private void AddNewSlots(int placedPosition)
+    {
+        // After placing an item, we need to ensure there are empty slots adjacent to it
+        // if there aren't already empty slots there
+        
+        // Check if we need to add a slot above
+        bool needSlotAbove = placedPosition == 0 || _gameState.Timeline[placedPosition - 1].Item != null;
+        
+        // Check if we need to add a slot below  
+        bool needSlotBelow = placedPosition == _gameState.Timeline.Count - 1 || _gameState.Timeline[placedPosition + 1].Item != null;
+        
+        // Add slot above first (so we don't mess up the placedPosition index)
+        if (needSlotAbove)
+        {
+            _gameState.Timeline.Insert(placedPosition, new TimelineSlot { Position = placedPosition, Item = null });
+            placedPosition++; // The placed item is now at placedPosition + 1
+        }
+        
+        // Add slot below (placedPosition is now adjusted if we added a slot above)
+        if (needSlotBelow)
+        {
+            _gameState.Timeline.Insert(placedPosition + 1, new TimelineSlot { Position = placedPosition + 1, Item = null });
+        }
+
+        // Update all positions to be sequential
+        for (int i = 0; i < _gameState.Timeline.Count; i++)
+        {
+            _gameState.Timeline[i].Position = i;
+        }
+    }
+
+    private async Task PlaySound(string soundType)
+    {
+        try
+        {
+            if (soundType == "correct")
+            {
+                await JSRuntime.InvokeVoidAsync("playCorrectSound");
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("playIncorrectSound");
+            }
+        }
+        catch
+        {
+            // Sound playback failed, continue silently
+        }
+    }
+
+    private async Task DownloadTemplate()
+    {
+        var template = new SortQuizData
+        {
+            Title = "Animal sizes",
+            UpperLabel = "Big",
+            LowerLabel = "Small",
+            Hint = "List at least 2 items from upperLabel → lowerLabel. If more than 20 items are provided, 20 random items will be selected.",
+            Items = new List<string> { "Elephant", "Dog", "Cat", "Raven", "Mouse", "Spider", "Ant" }
+        };
+
+        var json = JsonSerializer.Serialize(template, new JsonSerializerOptions { WriteIndented = true });
+        var bytes = System.Text.Encoding.UTF8.GetBytes(json);
+        var base64 = Convert.ToBase64String(bytes);
+        
+        await JSRuntime.InvokeVoidAsync("downloadFile", "sort-quiz-template.json", base64);
+    }
+
+    private int GetEmptySlotNumber(int slotIndex)
+    {
+        // Count how many empty slots come before this one
+        int emptySlotCount = 0;
+        for (int i = 0; i <= slotIndex; i++)
+        {
+            if (_gameState.Timeline[i].Item == null)
+            {
+                emptySlotCount++;
+            }
+        }
+        return emptySlotCount;
+    }
+
+    private string GetResultItemColor(string item)
+    {
+        if (_gameState.GameWon)
+        {
+            // If game was won, all items are green
+            return "player-placed";
+        }
+        else
+        {
+            // If game was lost, only the incorrectly placed item is red
+            if (item == _incorrectlyPlacedItem)
+            {
+                return "incorrectly-placed";
+            }
+            else
+            {
+                return "player-placed"; // All other items are green
+            }
+        }
+    }
+
+    private void ResetGame()
+    {
+        _quizData = null;
+        _gameState = new GameState();
+        _errorMessage = string.Empty;
+        _selectedItem = null;
+        _draggedItem = null;
+        _incorrectlyPlacedItem = null;
+    }
+}
