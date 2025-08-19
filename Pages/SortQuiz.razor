@@ -34,26 +34,27 @@
             <div class="game-container">
                 <div class="items-panel">
                     <h4>Available Items</h4>
-                    @foreach (var item in _gameState.RemainingItems)
-                    {
-                        <div class="item-card" 
-                             draggable="true" 
-                             @ondragstart="() => StartDrag(item)"
-                             @onclick="() => SelectItem(item)">
-                            @item
-                        </div>
-                    }
+                    <div class="items-grid" style="--current-available-items: @_gameState.RemainingItems.Count; --current-available-gaps: @(_gameState.RemainingItems.Count - 1);">
+                        @foreach (var item in _gameState.RemainingItems)
+                        {
+                            <div class="item-card @(item == _selectedItem ? "selected" : "")" 
+                                 draggable="true" 
+                                 @ondragstart="() => StartDrag(item)"
+                                 @onclick="() => SelectItem(item)">
+                                @item
+                            </div>
+                        }
+                    </div>
                 </div>
                 
                 <div class="sorting-panel">
-                    <h4>Sorting Area</h4>
                     <div class="sorting-container">
                         <div class="sorting-label-top">@_quizData.UpperLabel</div>
-                        @for (int i = 0; i < _gameState.Timeline.Count; i++)
-                        {
-                            var slot = _gameState.Timeline[i];
-                            var index = i; // Capture the index in a local variable
-                            <div class="sorting-item">
+                        <div class="sorting-slots-wrapper" style="--current-sorting-slots: @_gameState.Timeline.Count; --current-sorting-gaps: @(_gameState.Timeline.Count - 1);">
+                            @for (int i = 0; i < _gameState.Timeline.Count; i++)
+                            {
+                                var slot = _gameState.Timeline[i];
+                                var index = i; // Capture the index in a local variable
                                 <div class="sorting-slot @(slot.Item != null ? "filled" : "") @(_selectedItem != null && slot.Item == null ? "drop-target" : "")"
                                      @ondragover="PreventDefault"
                                      @ondragover:preventDefault="true"
@@ -66,14 +67,10 @@
                                     else
                                     {
                                         <span class="slot-number">@(GetEmptySlotNumber(index))</span>
-                                        @if (_selectedItem != null)
-                                        {
-                                            <span class="drop-hint">Drop here</span>
-                                        }
                                     }
                                 </div>
-                            </div>
-                        }
+                            }
+                        </div>
                         <div class="sorting-label-bottom">@_quizData.LowerLabel</div>
                     </div>
                 </div>
@@ -89,21 +86,21 @@
                     <h4>Correct Order:</h4>
                     <div class="sorting-container">
                         <div class="sorting-label-top">@_quizData.UpperLabel</div>
-                        @for (int i = 0; i < _gameState.CorrectOrder.Count; i++)
-                        {
-                            var item = _gameState.CorrectOrder[i];
-                            var itemColor = GetResultItemColor(item);
-                            <div class="sorting-item">
+                        <div class="sorting-slots-wrapper" style="--current-sorting-slots: @_gameState.CorrectOrder.Count; --current-sorting-gaps: @(_gameState.CorrectOrder.Count - 1);">
+                            @for (int i = 0; i < _gameState.CorrectOrder.Count; i++)
+                            {
+                                var item = _gameState.CorrectOrder[i];
+                                var itemColor = GetResultItemColor(item);
                                 <div class="result-slot @itemColor">
                                     <span>@item</span>
                                 </div>
-                            </div>
-                        }
+                            }
+                        </div>
                         <div class="sorting-label-bottom">@_quizData.LowerLabel</div>
                     </div>
                 </div>
                 
-                <button class="btn btn-primary mt-3" @onclick="ResetGame">Play Again</button>
+                <button class="btn btn-primary mt-2" @onclick="ResetGame">Play Again</button>
             </div>
         }
     }
@@ -168,35 +165,45 @@
     {
         if (_quizData == null) return;
 
-        // Take max 20 items and shuffle
-        var itemsToUse = _quizData.Items.Take(20).ToList();
         var random = new Random();
+        List<string> itemsToUse;
         
-        // Shuffle items
-        for (int i = itemsToUse.Count - 1; i > 0; i--)
+        // If more than 21 items, randomly select 21 while maintaining original order
+        if (_quizData.Items.Count > 21)
+        {
+            // Create list of indices and randomly select 21
+            var allIndices = Enumerable.Range(0, _quizData.Items.Count).ToList();
+            var selectedIndices = allIndices.OrderBy(x => random.Next()).Take(21).OrderBy(x => x).ToList();
+            itemsToUse = selectedIndices.Select(i => _quizData.Items[i]).ToList();
+        }
+        else
+        {
+            itemsToUse = _quizData.Items.Take(21).ToList();
+        }
+
+        // Pick one random item to be placed initially, keep others in correct order
+        var startingItemIndex = random.Next(itemsToUse.Count);
+        var startingItem = itemsToUse[startingItemIndex];
+        var remainingItems = itemsToUse.Where((item, index) => index != startingItemIndex).ToList();
+        
+        // Shuffle the remaining items for the available items panel
+        for (int i = remainingItems.Count - 1; i > 0; i--)
         {
             int j = random.Next(i + 1);
-            (itemsToUse[i], itemsToUse[j]) = (itemsToUse[j], itemsToUse[i]);
+            (remainingItems[i], remainingItems[j]) = (remainingItems[j], remainingItems[i]);
         }
 
         _gameState = new GameState
         {
-            RemainingItems = itemsToUse.Skip(1).ToList(), // All except one
-            CorrectOrder = _quizData.Items.Take(20).ToList(), // Original order is correct
+            RemainingItems = remainingItems,
+            CorrectOrder = itemsToUse, // Maintain correct order for validation
             Timeline = new List<TimelineSlot> 
             { 
                 new() { Position = 0, Item = null }, // Empty slot above
-                new() { Position = 1, Item = itemsToUse.First() }, // Starting item
+                new() { Position = 1, Item = startingItem }, // Starting item
                 new() { Position = 2, Item = null } // Empty slot below
             }
         };
-        
-        // Shuffle remaining items
-        for (int i = _gameState.RemainingItems.Count - 1; i > 0; i--)
-        {
-            int j = random.Next(i + 1);
-            (_gameState.RemainingItems[i], _gameState.RemainingItems[j]) = (_gameState.RemainingItems[j], _gameState.RemainingItems[i]);
-        }
     }
 
     private void SelectItem(string item)
@@ -207,6 +214,7 @@
     private void StartDrag(string item)
     {
         _draggedItem = item;
+        _selectedItem = null; // Clear selection when starting drag
     }
 
     private void PreventDefault(DragEventArgs e)
@@ -403,6 +411,7 @@
         }
         return emptySlotCount;
     }
+
 
     private string GetResultItemColor(string item)
     {
