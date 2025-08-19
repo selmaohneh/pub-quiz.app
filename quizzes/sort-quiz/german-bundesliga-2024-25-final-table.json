@@ -1,0 +1,26 @@
+{
+  "title": "German Bundesliga 2024/25 Final Table",
+  "upperLabel": "Highest Position",
+  "lowerLabel": "Lowest Position",
+  "hint": "Sort teams from 1st place to 18th place in the final Bundesliga table",
+  "items": [
+    "FC Bayern München",
+    "Bayer 04 Leverkusen",
+    "Eintracht Frankfurt",
+    "Borussia Dortmund",
+    "SC Freiburg",
+    "1. FSV Mainz 05",
+    "RB Leipzig",
+    "Werder Bremen",
+    "VfB Stuttgart",
+    "Borussia Mönchengladbach",
+    "VfL Wolfsburg",
+    "FC Augsburg",
+    "1. FC Union Berlin",
+    "FC St. Pauli",
+    "TSG 1899 Hoffenheim",
+    "1. FC Heidenheim",
+    "Holstein Kiel",
+    "VfL Bochum"
+  ]
+} 

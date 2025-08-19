@@ -1,0 +1,28 @@
+{
+  "title": "Beer Brands by Global Sales Volume",
+  "upperLabel": "Highest Sales",
+  "lowerLabel": "Lowest Sales",
+  "hint": "Sort beer brands from highest to lowest global sales volume",
+  "items": [
+    "Snow",
+    "Budweiser",
+    "Tsingtao",
+    "Bud Light",
+    "Skol",
+    "Heineken",
+    "Corona",
+    "Harbin",
+    "Coors Light",
+    "Guinness",
+    "Carlsberg",
+    "Modelo",
+    "Stella Artois",
+    "Brahma",
+    "Miller Lite",
+    "Asahi",
+    "Yanjing",
+    "Beck's",
+    "Kirin",
+    "Foster's"
+  ]
+} 

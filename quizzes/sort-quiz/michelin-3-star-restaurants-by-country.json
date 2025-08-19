@@ -1,0 +1,20 @@
+{
+  "title": "Michelin 3-Star Restaurants by Country",
+  "upperLabel": "Most Restaurants",
+  "lowerLabel": "Fewest Restaurants",
+  "hint": "Sort countries from most to fewest Michelin 3-star restaurants",
+  "items": [
+    "France (incl. Monaco)",
+    "Japan",
+    "Spain",
+    "United States",
+    "Italy",
+    "Germany",
+    "United Kingdom",
+    "Hong Kong and Macau",
+    "Switzerland",
+    "Denmark",
+    "Norway",
+    "South Korea"
+  ]
+} 

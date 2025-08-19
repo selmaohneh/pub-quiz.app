@@ -1,0 +1,18 @@
+{
+  "title": "Age at Death of Famous Musicians",
+  "upperLabel": "Old",
+  "lowerLabel": "Young",
+  "hint": "Sort musicians from oldest to youngest age at time of death",
+  "items": [
+    "Tina Turner",
+    "Ozzy Osbourne",
+    "Lemmy Kilmister",
+    "Prince",
+    "Michael Jackson",
+    "Whitney Houston",
+    "Elvis Presley",
+    "Chester Bennington",
+    "John Lennon",
+    "Kurt Cobain"
+  ]
+} 

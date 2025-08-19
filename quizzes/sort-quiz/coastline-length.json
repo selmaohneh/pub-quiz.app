@@ -1,0 +1,24 @@
+{
+  "title": "Coastline Length",
+  "upperLabel": "Long",
+  "lowerLabel": "Short",
+  "hint": "Sort countries from longest to shortest coastline length",
+  "items": [
+    "Canada",
+    "Russia",
+    "Brazil",
+    "Japan",
+    "Cuba",
+    "Italy",
+    "Ireland",
+    "North Korea",
+    "Portugal",
+    "Morocco",
+    "Poland",
+    "Ivory Coast",
+    "Israel",
+    "Iraq",
+    "Monaco",
+    "Hungary"
+  ]
+} 
