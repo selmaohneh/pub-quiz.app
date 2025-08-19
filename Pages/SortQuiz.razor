@@ -3,13 +3,13 @@
 @using System.Text.Json
 @inject IJSRuntime JSRuntime
 
-<PageTitle>Sort Quiz - pub-quiz.app</PageTitle>
+<PageTitle>Sort Quiz | Pub-Quiz App</PageTitle>
 
-<div class="sort-quiz-container">
+<div class="sort-quiz-container @(_quizData != null ? "playing" : "")">
     @if (_quizData == null)
     {
         <div class="quiz-setup">
-            <h2>Sort Quiz</h2>
+            <h2>📋 Sort Quiz</h2>
             <p class="lead">Sort items in the correct order. Who's the first to guess wrong?</p>
             
             <div class="how-to-play">
