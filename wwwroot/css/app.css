@@ -454,6 +454,19 @@ code {
     background: #fafafa;
 }
 
+.button-group {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.button-group .btn {
+    flex: 1;
+    min-width: 160px;
+    max-width: 200px;
+}
+
 /* Fixed sizing - no dynamic classes needed */
 
 /* Responsive adjustments */
