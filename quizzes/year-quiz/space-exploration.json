@@ -1,0 +1,50 @@
+{
+  "title": "Space Exploration Milestones",
+  "hint": "Test your knowledge of when these space exploration achievements happened",
+  "items": [
+    {
+      "title": "First artificial satellite (Sputnik) launched",
+      "year": 1957
+    },
+    {
+      "title": "Yuri Gagarin becomes first human in space",
+      "year": 1961
+    },
+    {
+      "title": "John F. Kennedy announces moon landing goal",
+      "year": 1961
+    },
+    {
+      "title": "First spacewalk performed",
+      "year": 1965
+    },
+    {
+      "title": "Apollo 11 moon landing",
+      "year": 1969
+    },
+    {
+      "title": "First space station (Salyut 1) launched",
+      "year": 1971
+    },
+    {
+      "title": "Viking 1 lands on Mars",
+      "year": 1976
+    },
+    {
+      "title": "Space Shuttle program begins",
+      "year": 1981
+    },
+    {
+      "title": "Hubble Space Telescope launched",
+      "year": 1990
+    },
+    {
+      "title": "International Space Station construction begins",
+      "year": 1998
+    },
+    {
+      "title": "SpaceX first successful rocket landing",
+      "year": 2015
+    }
+  ]
+} 

@@ -1,0 +1,38 @@
+{
+  "title": "World War Historical Events",
+  "hint": "Guess the year these significant World War events occurred",
+  "items": [
+    {
+      "title": "World War I begins",
+      "year": 1914
+    },
+    {
+      "title": "United States enters World War I",
+      "year": 1917
+    },
+    {
+      "title": "World War I ends with Armistice",
+      "year": 1918
+    },
+    {
+      "title": "Germany invades Poland, starting World War II",
+      "year": 1939
+    },
+    {
+      "title": "Attack on Pearl Harbor",
+      "year": 1941
+    },
+    {
+      "title": "D-Day: Allied invasion of Normandy",
+      "year": 1944
+    },
+    {
+      "title": "Atomic bomb dropped on Hiroshima",
+      "year": 1945
+    },
+    {
+      "title": "World War II ends",
+      "year": 1945
+    }
+  ]
+} 
