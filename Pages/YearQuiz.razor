@@ -199,7 +199,8 @@
     .progress-fill {
         height: 100%;
         background: #007bff;
-        transition: width 0.1s ease;
+        transition: width 0.25s ease-out;
+        will-change: width;
     }
 
     .stop-button-container {
@@ -444,7 +445,7 @@
     private void StartGameTimer()
     {
         _gameTimer?.Dispose();
-        _gameTimer = new Timer(UpdateGameProgress, null, 0, 100); // Update every 100ms for smooth progress bar
+        _gameTimer = new Timer(UpdateGameProgress, null, 0, 250); // Update every 250ms instead of 100ms for better mobile performance
     }
 
     private async void UpdateGameProgress(object? state)
@@ -455,8 +456,14 @@
         var timeSinceLastUpdate = now - _gameState.LastRangeUpdateTime;
         var totalSeconds = timeSinceLastUpdate.TotalSeconds;
 
-        // Update progress percentage (0-100 over 10 seconds)
-        _gameState.ProgressPercentage = Math.Min(100, (totalSeconds / 10.0) * 100);
+        // Update progress percentage (0-100 over 10 seconds) with smoother calculation
+        var newProgressPercentage = Math.Min(100, (totalSeconds / 10.0) * 100);
+        
+        // Only update if there's a meaningful change to reduce unnecessary re-renders
+        if (Math.Abs(newProgressPercentage - _gameState.ProgressPercentage) > 0.5)
+        {
+            _gameState.ProgressPercentage = newProgressPercentage;
+        }
 
         // Check if we need to increase the range
         if (totalSeconds >= 10)

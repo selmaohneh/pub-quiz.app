@@ -81,3 +81,41 @@
         overflow-y: auto;
     }
 }
+
+/* Mobile-specific styles to fix overlap */
+@media (max-width: 640.98px) {
+    .nav-scrollable {
+        /* Make nav menu take full height on mobile */
+        height: calc(100vh - 3.5rem);
+        overflow-y: auto;
+    }
+    
+    .nav-scrollable nav {
+        /* Remove absolute positioning on mobile to prevent overlap */
+        position: static !important;
+        height: auto !important;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: calc(100vh - 3.5rem);
+    }
+    
+    /* Ensure legal items stay at bottom but don't overlap */
+    .nav-scrollable nav > div:last-child {
+        margin-top: auto;
+        padding-top: 2rem;
+    }
+    
+    /* Reduce vertical spacing on mobile */
+    .nav-item {
+        padding-bottom: 0.25rem;
+    }
+    
+    .nav-item:first-of-type {
+        padding-top: 0.5rem;
+    }
+    
+    .nav-item:last-of-type {
+        padding-bottom: 0.5rem;
+    }
+}
