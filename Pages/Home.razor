@@ -6,90 +6,51 @@
     <h1>Welcome to the Pub-Quiz App 👋</h1>
     <p class="lead">Create and play mini games with your friends!</p>
     
-    <div class="available-games">
-        <h2>Available Games</h2>
-        <div class="game-list">
-            <div class="game-card">
-                <h3>📋 Sort Quiz</h3>
-                <p>Sort items in the correct order. Who's the first to guess wrong?</p>
-                <a href="/sort-quiz" class="btn btn-primary">Play Now</a>
-            </div>
-            <div class="game-card">
-                <h3>📅 Year Quiz</h3>
-                <p>Guess the year of historical events. How close can you get?</p>
-                <a href="/year-quiz" class="btn btn-primary">Play Now</a>
-            </div>
-            <div class="game-card">
-                <h3>🤥 Who Lies?</h3>
-                <p>Spot the lies among the truths. How is your fast thinking?</p>
-                <a href="/lie-quiz" class="btn btn-primary">Play Now</a>
+    <div class="action-sections">
+        <div class="action-card">
+            <h2>🎮 Play Games</h2>
+            <p>Ready to test your knowledge? Try one of our exciting quiz games!</p>
+            <div class="game-list">
+                <div class="game-card">
+                    <h3>📋 Sort Quiz</h3>
+                    <p>Sort items in the correct order. Who's the first to guess wrong?</p>
+                    <a href="/sort-quiz" class="btn btn-primary">Play Now</a>
+                </div>
+                <div class="game-card">
+                    <h3>📅 Year Quiz</h3>
+                    <p>Guess the year of historical events. How close can you get?</p>
+                    <a href="/year-quiz" class="btn btn-primary">Play Now</a>
+                </div>
+                <div class="game-card">
+                    <h3>🤥 Who Lies?</h3>
+                    <p>Spot the lies among the truths. How is your fast thinking?</p>
+                    <a href="/lie-quiz" class="btn btn-primary">Play Now</a>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="quiz-night-guide">
-        <h2>🎉 Host a Fun Quiz Night with Friends!</h2>
-        <p class="lead">Transform your living room into the ultimate quiz arena and challenge your friends to an epic battle of wits!</p>
-        
-        <div class="guide-steps">
-            <div class="guide-step">
-                <h3>📋 Preparation (1-2 days before)</h3>
-                <ul>
-                    <li><strong>Invite your friends</strong> - Create a group chat and get everyone excited!</li>
-                    <li><strong>Prepare at least 3 quizzes of each type</strong> - Sort Quiz, Year Quiz, and Who Lies? games</li>
-                    <li><strong>Save the JSON files</strong> - Make sure all your quiz data is ready to go</li>
-                    <li><strong>Set up your tech</strong> - Ensure you have a big screen or TV ready for casting</li>
-                </ul>
+        <div class="action-card">
+            <h2>🎉 Host a Quiz Night</h2>
+            <p>Want to host an epic quiz night with friends? We've got you covered with a complete guide!</p>
+            <div class="quiz-night-preview">
+                <div class="preview-item">
+                    <span class="icon">📋</span>
+                    <span>Preparation tips</span>
+                </div>
+                <div class="preview-item">
+                    <span class="icon">🎮</span>
+                    <span>Setup instructions</span>
+                </div>
+                <div class="preview-item">
+                    <span class="icon">🍕</span>
+                    <span>Food & drinks ideas</span>
+                </div>
+                <div class="preview-item">
+                    <span class="icon">🏆</span>
+                    <span>Game rules & scoring</span>
+                </div>
             </div>
-            
-            <div class="guide-step">
-                <h3>🎮 Setup (30 minutes before)</h3>
-                <ul>
-                    <li><strong>Cast this page to your big screen</strong> - Use Chromecast, AirPlay, or HDMI cable</li>
-                    <li><strong>Prepare buzzers or keyboards</strong> - Each team needs a way to signal their answers</li>
-                    <li><strong>Set up scoring system</strong> - Whiteboard, paper, or digital score tracker</li>
-                    <li><strong>Create teams</strong> - 2-4 people per team works best</li>
-                </ul>
-            </div>
-            
-            <div class="guide-step">
-                <h3>🍕 Food & Drinks</h3>
-                <ul>
-                    <li><strong>Order or prepare snacks</strong> - Pizza, nachos, finger foods that won't distract from the game</li>
-                    <li><strong>Provide drinks</strong> - Beer, wine, soft drinks, or whatever your group prefers</li>
-                    <li><strong>Keep it simple</strong> - You want to focus on the quiz, not cooking!</li>
-                </ul>
-            </div>
-            
-            <div class="guide-step">
-                <h3>🏆 Game Rules</h3>
-                <ul>
-                    <li><strong>Play locally</strong> - Everyone in the same room for maximum fun and banter</li>
-                    <li><strong>Count points per team</strong> - Keep track of scores throughout the night</li>
-                    <li><strong>Mix up the quiz types</strong> - Alternate between Sort Quiz, Year Quiz, and Who Lies?</li>
-                    <li><strong>Add bonus rounds</strong> - Quick fire questions or team challenges</li>
-                </ul>
-            </div>
-            
-            <div class="guide-step">
-                <h3>🎊 The Grand Finale</h3>
-                <ul>
-                    <li><strong>Announce the winner</strong> - Dramatic reveal of the final scores</li>
-                    <li><strong>Let the winner host the next quiz night!</strong> - Keep the tradition going</li>
-                    <li><strong>Take photos</strong> - Document the fun for future memories</li>
-                    <li><strong>Plan the next one</strong> - The winner gets to choose the theme for next time</li>
-                </ul>
-            </div>
-        </div>
-        
-        <div class="pro-tips">
-            <h3>💡 Pro Tips</h3>
-            <ul>
-                <li>Have a backup plan in case of technical issues</li>
-                <li>Keep the energy high with music between rounds</li>
-                <li>Consider themed nights (movies, sports, history, etc.)</li>
-                <li>Don't forget to have fun - it's not about winning, it's about laughing together!</li>
-            </ul>
+            <a href="/quiz-night-guide" class="btn btn-success">Learn How to Host</a>
         </div>
     </div>
 </div>
@@ -132,23 +93,63 @@
         overflow-x: auto;
     }
     
+    .action-sections {
+        display: grid;
+        gap: 3rem;
+        margin-top: 3rem;
+    }
+    
+    .action-card {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease;
+    }
+    
+    .action-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    
+    .action-card h2 {
+        color: #333;
+        margin-top: 0;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+    }
+    
+    .action-card p {
+        color: #666;
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+    }
+    
     .game-list {
         display: grid;
         gap: 1.5rem;
-        margin-top: 2rem;
+        margin-top: 1.5rem;
     }
     
     .game-card {
-        background: #fff;
+        background: #f8f9fa;
         border: 1px solid #e9ecef;
         border-radius: 8px;
         padding: 1.5rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: all 0.2s ease;
+    }
+    
+    .game-card:hover {
+        background: #fff;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     
     .game-card h3 {
         margin-top: 0;
         color: #333;
+        font-size: 1.2rem;
     }
     
     .game-card p {
@@ -156,81 +157,67 @@
         margin-bottom: 1rem;
     }
     
-    .quiz-night-guide {
-        margin-top: 4rem;
-        padding-top: 3rem;
-        border-top: 2px solid #e9ecef;
-    }
-    
-    .quiz-night-guide h2 {
-        color: #28a745;
-        margin-bottom: 1rem;
-    }
-    
-    .guide-steps {
+    .quiz-night-preview {
         display: grid;
-        gap: 2rem;
-        margin: 2rem 0;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin: 1.5rem 0;
     }
     
-    .guide-step {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        padding: 2rem;
-        border-radius: 12px;
-        border-left: 5px solid #28a745;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        transition: transform 0.2s ease;
+    .preview-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 3px solid #28a745;
     }
     
-    .guide-step:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    .preview-item .icon {
+        font-size: 1.5rem;
     }
     
-    .guide-step h3 {
-        margin-top: 0;
-        color: #28a745;
-        font-size: 1.3rem;
-        margin-bottom: 1rem;
-    }
-    
-    .guide-step ul {
-        margin: 0;
-        padding-left: 1.5rem;
-    }
-    
-    .guide-step li {
-        margin-bottom: 0.5rem;
-        line-height: 1.6;
-    }
-    
-    .guide-step strong {
+    .preview-item span:last-child {
         color: #495057;
+        font-weight: 500;
     }
     
-    .pro-tips {
-        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-        padding: 2rem;
-        border-radius: 12px;
-        border-left: 5px solid #ffc107;
-        margin-top: 2rem;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        text-decoration: none;
+        border-radius: 6px;
+        display: inline-block;
+        transition: all 0.2s ease;
     }
     
-    .pro-tips h3 {
-        color: #856404;
-        margin-top: 0;
-        margin-bottom: 1rem;
+    .btn-success:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
     
-    .pro-tips ul {
-        margin: 0;
-        padding-left: 1.5rem;
-    }
-    
-    .pro-tips li {
-        margin-bottom: 0.5rem;
-        line-height: 1.6;
-        color: #856404;
+    @@media (max-width: 768px) {
+        .action-sections {
+            gap: 2rem;
+        }
+        
+        .action-card {
+            padding: 1.5rem;
+        }
+        
+        .quiz-night-preview {
+            grid-template-columns: 1fr;
+        }
+        
+        .game-list {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
