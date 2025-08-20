@@ -190,24 +190,22 @@
     {
         try
         {
-            // Get the list of JSON files from the quizzes directory
-            var quizFilesResponse = await Http.GetAsync("quizzes/sort-quiz/");
-            if (!quizFilesResponse.IsSuccessStatusCode)
+            // Get the manifest file that lists all available quiz files
+            var manifestResponse = await Http.GetAsync("quizzes/sort-quiz/manifest.json");
+            if (!manifestResponse.IsSuccessStatusCode)
             {
-                // If we can't get the directory listing, fall back to a known list
-                await LoadQuizzesFromKnownList();
+                // If we can't get the manifest, return empty list
+                _allQuizzes.Clear();
                 return;
             }
 
-            var htmlContent = await quizFilesResponse.Content.ReadAsStringAsync();
+            var manifestContent = await manifestResponse.Content.ReadAsStringAsync();
+            var quizFiles = JsonSerializer.Deserialize<List<string>>(manifestContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             
-            // Parse the HTML directory listing to extract JSON filenames
-            var quizFiles = ExtractJsonFilesFromHtml(htmlContent);
-            
-            if (quizFiles.Count == 0)
+            if (quizFiles == null || quizFiles.Count == 0)
             {
-                // Fallback to known list if no files found
-                await LoadQuizzesFromKnownList();
+                // No files found
+                _allQuizzes.Clear();
                 return;
             }
 
@@ -231,75 +229,12 @@
         }
         catch
         {
-            // Handle error silently and fall back to known list
-            await LoadQuizzesFromKnownList();
+            // Handle error silently
+            _allQuizzes.Clear();
         }
     }
 
-    private List<string> ExtractJsonFilesFromHtml(string htmlContent)
-    {
-        var quizFiles = new List<string>();
-        
-        // Simple regex to extract JSON filenames from HTML directory listing
-        var pattern = @"href=""([^""]*\.json)""";
-        var matches = System.Text.RegularExpressions.Regex.Matches(htmlContent, pattern);
-        
-        foreach (System.Text.RegularExpressions.Match match in matches)
-        {
-            if (match.Groups.Count > 1)
-            {
-                var filename = match.Groups[1].Value;
-                if (filename.EndsWith(".json"))
-                {
-                    quizFiles.Add(filename);
-                }
-            }
-        }
-        
-        return quizFiles;
-    }
 
-    private async Task LoadQuizzesFromKnownList()
-    {
-        // Fallback method with known quiz files
-        var quizFiles = new[]
-        {
-            "age-at-death-of-famous-musicians.json",
-            "animal-maximum-lifespans.json",
-            "beer-brands-by-global-sales.json",
-            "best-selling-albums-by-millions-sold.json",
-            "chemical-elements-by-atomic-number.json",
-            "coastline-length.json",
-            "countries-by-active-military-personnel.json",
-            "german-bundesliga-2024-25-final-table.json",
-            "major-gaming-consoles-by-release-year.json",
-            "meat-consumption-per-country-2020.json",
-            "michelin-3-star-restaurants-by-country.json",
-            "most-visited-cities-by-international-visitors-2024.json",
-            "time-person-of-the-year-by-year.json",
-            "top-films-by-imdb-score-2025.json",
-            "us-presidents-newest-to-oldest.json",
-            "world-religions-by-population.json"
-        };
-
-        _allQuizzes.Clear();
-        foreach (var quizFile in quizFiles)
-        {
-            try
-            {
-                var json = await Http.GetStringAsync($"quizzes/sort-quiz/{quizFile}");
-                var quiz = JsonSerializer.Deserialize<SortQuizData>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                if (quiz != null)
-                {
-                    _allQuizzes.Add(quiz);
-                }
-            }
-            catch
-            {
-                // Skip quizzes that can't be loaded
-            }
-        }
-    }
 
     private void ShowRandomQuizzes()
     {

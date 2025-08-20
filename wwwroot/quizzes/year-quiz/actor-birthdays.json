@@ -1,0 +1,74 @@
+{
+  "title": "Actor Birthdays",
+  "description": "Guess the birth year of famous actors and actresses.",
+  "items": [
+    {
+      "title": "Denzel Washington",
+      "year": 1954
+    },
+    {
+      "title": "Morgan Freeman",
+      "year": 1937
+    },
+    {
+      "title": "Leonardo DiCaprio",
+      "year": 1974
+    },
+    {
+      "title": "Tom Hanks",
+      "year": 1956
+    },
+    {
+      "title": "Tom Cruise",
+      "year": 1962
+    },
+    {
+      "title": "Robert Downey Jr",
+      "year": 1965
+    },
+    {
+      "title": "Robert De Niro",
+      "year": 1943
+    },
+    {
+      "title": "Brad Pitt",
+      "year": 1963
+    },
+    {
+      "title": "Scarlett Johansson",
+      "year": 1984
+    },
+    {
+      "title": "Natalie Portman",
+      "year": 1981
+    },
+    {
+      "title": "Meryl Streep",
+      "year": 1949
+    },
+    {
+      "title": "Cate Blanchett",
+      "year": 1969
+    },
+    {
+      "title": "Emma Watson",
+      "year": 1990
+    },
+    {
+      "title": "Emma Stone",
+      "year": 1988
+    },
+    {
+      "title": "Keira Knightley",
+      "year": 1985
+    },
+    {
+      "title": "Marilyn Monroe",
+      "year": 1926
+    },
+    {
+      "title": "Margot Robbie",
+      "year": 1990
+    }
+  ]
+} 
