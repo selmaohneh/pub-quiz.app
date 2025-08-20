@@ -6,9 +6,9 @@ on:
     branches: [ master ]
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages and manifest updates
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -28,6 +28,35 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Update quiz manifests
+      run: |
+        echo "Current directory: $(pwd)"
+        echo "Listing quiz directories:"
+        ls -la wwwroot/quizzes/
+        echo "Running manifest update script:"
+        python3 scripts/update-manifests.py
+        echo "Manifest files after update:"
+        cat wwwroot/quizzes/lie-quiz/manifest.json
+        cat wwwroot/quizzes/sort-quiz/manifest.json
+        cat wwwroot/quizzes/year-quiz/manifest.json
+        
+    - name: Commit manifest updates
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add wwwroot/quizzes/*/manifest.json
+        if git diff --staged --quiet; then
+          echo "No manifest changes to commit"
+        else
+          git commit -m "Auto-update quiz manifests before deployment"
+          git push
+        fi
+        
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
