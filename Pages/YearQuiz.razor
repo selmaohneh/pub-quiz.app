@@ -15,6 +15,48 @@
             <h2>📅 Year Quiz</h2>
             <p class="lead">Guess the year of historical events. How close can you get?</p>
             
+            <!-- How to Play Section -->
+            <div class="how-to-play-section">
+                <h3>🎯 How to Play</h3>
+                <div class="rules-container">
+                    <div class="rule-item">
+                        <span class="rule-icon">🎲</span>
+                        <div class="rule-content">
+                            <h4>Game Setup</h4>
+                            <p>An event is shown and you need to guess the correct year. The range of acceptable answers gets bigger as time passes. When do you dare to guess?</p>
+                        </div>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-icon">👥</span>
+                        <div class="rule-content">
+                            <h4>Team Competition</h4>
+                            <p>Teams compete to be the first to press "Stop & Guess" when they think they know the year.</p>
+                        </div>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-icon">✅</span>
+                        <div class="rule-content">
+                            <h4>Correct Answer</h4>
+                            <p>The first team to hit the button and give a correct answer gets a point.</p>
+                        </div>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-icon">❌</span>
+                        <div class="rule-content">
+                            <h4>Wrong Answer</h4>
+                            <p>If the answer is wrong, all other teams get 1 point.</p>
+                        </div>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-icon">🏆</span>
+                        <div class="rule-content">
+                            <h4>Winning</h4>
+                            <p>Play multiple rounds and the team with the most points wins!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Community Quiz Section -->
             <div class="community-quiz-section">
                 <h3>Play a Community Quiz 🎮</h3>
@@ -306,6 +348,73 @@
         gap: 1rem;
         justify-content: center;
         margin-top: 2rem;
+    }
+    
+    /* How to Play Section Styles */
+    .how-to-play-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    
+    .how-to-play-section h3 {
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+        text-align: center;
+    }
+    
+    .rules-container {
+        display: grid;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .rule-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1.5rem;
+        border-radius: 8px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .rule-icon {
+        font-size: 2rem;
+        flex-shrink: 0;
+        margin-top: 0.25rem;
+    }
+    
+    .rule-content h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.2rem;
+        color: white;
+    }
+    
+    .rule-content p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.5;
+    }
+    
+    @@media (max-width: 768px) {
+        .how-to-play-section {
+            padding: 1.5rem;
+        }
+        
+        .rule-item {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .rule-icon {
+            margin-top: 0;
+        }
     }
 </style>
 
