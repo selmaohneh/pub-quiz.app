@@ -1,0 +1,597 @@
+@page "/lie-quiz"
+@using pub_quiz.Models
+@using System.Text.Json
+@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+
+<PageTitle>Who Lies? Quiz | Pub-Quiz App</PageTitle>
+
+<div class="sort-quiz-container @(_quizData != null ? "playing" : "")">
+    @if (_quizData == null)
+    {
+        <div class="quiz-setup">
+            <h2>🤥 Who Lies?</h2>
+            <p class="lead">Spot the lies among the truths! Press space or enter when you see something that doesn't belong.</p>
+            
+            <div class="how-to-play">
+                <h3>How to Play</h3>
+                <div class="instructions">
+                    <div class="instruction-step">
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <h4>Download the template</h4>
+                            <p>Get the JSON template file to create your own lie quiz</p>
+                        </div>
+                    </div>
+                    <div class="instruction-step">
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <h4>Create your quiz</h4>
+                            <p>Edit the JSON file with a question/topic and items. Mark which items are lies with "isLie": true.</p>
+                        </div>
+                    </div>
+                    <div class="instruction-step">
+                        <span class="step-number">3</span>
+                        <div class="step-content">
+                            <h4>Watch the items</h4>
+                            <p>Items appear every 5 seconds. Most are true, but some are lies!</p>
+                        </div>
+                    </div>
+                    <div class="instruction-step">
+                        <span class="step-number">4</span>
+                        <div class="step-content">
+                            <h4>Spot the lie</h4>
+                            <p>Press Space, Enter, or click the "That's a Lie!" button when you see something false</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="upload-section">
+                <div class="button-group">
+                    <button class="btn btn-primary" @onclick="DownloadTemplate">Download Template</button>
+                    <button class="btn btn-success" @onclick="TriggerFileUpload">Upload and Play</button>
+                    <InputFile @ref="fileInput" OnChange="HandleFileUpload" accept=".json" style="display: none;" />
+                </div>
+            </div>
+            
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="alert alert-danger mt-3">@_errorMessage</div>
+            }
+        </div>
+    }
+    else
+    {        
+        @if (!_gameState.GameEnded && !_gameState.ShowResult)
+        {
+            <div class="lie-game-container">
+                <div class="question-display">
+                    <h3>@_gameState.Question</h3>
+                </div>
+                
+                <div class="current-item">
+                    <h1>@_gameState.CurrentItem?.Name</h1>
+                </div>
+                
+                <div class="countdown-container">
+                    <div class="countdown-text">
+                        Next item in <span class="countdown-seconds">@_gameState.SecondsUntilNextItem</span>s
+                    </div>
+                </div>
+                
+                <div class="lie-button-container">
+                    <button class="btn btn-danger btn-lg lie-button" @onclick="GuessLie">
+                        🤥 That's a Lie!
+                    </button>
+                </div>
+            </div>
+        }
+        else if (_gameState.ShowResult)
+        {
+            <div class="game-result @(_gameState.WasCorrectGuess ? "success" : "failure")">
+                <div class="result-title">
+                    <h3>@(_gameState.WasCorrectGuess ? (_gameState.PlayerGuessedLie ? "Correct! It was a lie! 🎉" : "Correct! It was true! ✅") : (_gameState.PlayerGuessedLie ? "Wrong! It was actually true! 😔" : "Missed! It was a lie! 😔"))</h3>
+                </div>
+                
+                <div class="result-details">
+                    <div class="item-info">
+                        <h4>@_gameState.CurrentItem?.Name</h4>
+                        <p class="item-status">This item was: <strong>@(_gameState.CurrentItem?.IsLie == true ? "A LIE" : "TRUE")</strong></p>
+                    </div>
+                </div>
+                
+                <div class="continue-button">
+                    <button class="btn btn-primary" @onclick="ContinueGame">Continue</button>
+                </div>
+            </div>
+        }
+        else if (_gameState.GameEnded)
+        {
+            <div class="game-result @(_gameState.LiesFound == _gameState.TotalLies ? "success" : "failure")">
+                <div class="final-title">
+                    <h2>Game Complete! 🎮</h2>
+                </div>
+                
+                <div class="result-items-area">
+                    <h4>All Items:</h4>
+                    <div class="result-items-grid">
+                        @foreach (var item in _quizData.Items)
+                        {
+                            <div class="result-item @(item.IsLie ? "lie-item" : "truth-item")">
+                                @item.Name
+                            </div>
+                        }
+                    </div>
+                </div>
+                
+                <div class="final-buttons">
+                    <button class="btn btn-success" @onclick="RetryGame">Retry</button>
+                    <button class="btn btn-primary" @onclick="ResetGame">New Game</button>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<style>
+    .lie-game-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
+        gap: 2rem;
+    }
+
+    .question-display h3 {
+        font-size: 2rem;
+        color: #6c757d;
+        text-align: center;
+        margin: 0;
+        font-weight: 400;
+        font-style: italic;
+    }
+
+    .current-item h1 {
+        font-size: 4rem;
+        text-align: center;
+        margin: 2rem 0;
+        font-weight: bold;
+        color: #007bff;
+        min-height: 5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+
+
+    .countdown-container {
+        width: 100%;
+        max-width: 600px;
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+    .countdown-text {
+        font-size: 1.5rem;
+        color: #6c757d;
+        font-weight: bold;
+    }
+
+    .countdown-seconds {
+        color: #007bff;
+    }
+
+    .lie-button-container {
+        margin-top: 1rem;
+    }
+
+    .lie-button {
+        font-size: 1.5rem;
+        padding: 1rem 2rem;
+        border-radius: 0;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        transition: all 0.2s ease;
+    }
+
+    .lie-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    }
+
+    .result-title {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .result-title h3 {
+        margin-bottom: 0.5rem;
+        font-size: 2rem;
+    }
+
+    .result-details {
+        text-align: center;
+        margin: 2rem 0;
+    }
+
+    .item-info h4 {
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+        color: #007bff;
+    }
+
+    .item-status {
+        font-size: 1.2rem;
+        margin: 0;
+    }
+
+    .continue-button, .final-buttons {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .final-buttons {
+        gap: 1rem;
+    }
+
+    .result-items-area {
+        margin: 2rem 0;
+        text-align: center;
+    }
+
+    .result-items-area h4 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #495057;
+    }
+
+    .result-items-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.5rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .result-item {
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        font-weight: 500;
+        text-align: center;
+        border: 2px solid;
+    }
+
+    .result-item.truth-item {
+        border-color: #28a745;
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .result-item.lie-item {
+        border-color: #dc3545;
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .final-title {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .final-title h2 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    @@media (max-width: 768px) {
+        .current-item h1 {
+            font-size: 2.5rem;
+        }
+        
+        .question-display h3 {
+            font-size: 1.5rem;
+        }
+        
+        .result-items-grid {
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+        
+        .result-item {
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+@code {
+    private LieQuizData? _quizData;
+    private LieGameState _gameState = new();
+    private string _errorMessage = string.Empty;
+    private InputFile? fileInput;
+    private Timer? _gameTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("addKeyboardListeners", DotNetObjectReference.Create(this));
+        }
+    }
+
+    public void Dispose()
+    {
+        _gameTimer?.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _gameTimer?.Dispose();
+        await JSRuntime.InvokeVoidAsync("removeKeyboardListeners");
+    }
+
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        _errorMessage = string.Empty;
+        
+        try
+        {
+            var file = e.File;
+            if (file.Size > 1024 * 1024) // 1MB limit
+            {
+                _errorMessage = "File size must be less than 1MB.";
+                return;
+            }
+
+            using var stream = file.OpenReadStream();
+            using var reader = new StreamReader(stream);
+            var content = await reader.ReadToEndAsync();
+            
+            _quizData = JsonSerializer.Deserialize<LieQuizData>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (_quizData == null)
+            {
+                _errorMessage = "Invalid JSON format.";
+                return;
+            }
+
+            if (_quizData.Items.Count < 2)
+            {
+                _errorMessage = "Quiz must have at least 2 items.";
+                return;
+            }
+
+            if (!_quizData.Items.Any(x => x.IsLie))
+            {
+                _errorMessage = "Quiz must have at least one lie (isLie: true).";
+                return;
+            }
+
+            InitializeGame();
+            await TrackLieQuizStarted();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error loading file: {ex.Message}";
+        }
+    }
+
+    private void InitializeGame()
+    {
+        if (_quizData == null) return;
+
+        // Shuffle items
+        var random = new Random();
+        var shuffledItems = _quizData.Items.OrderBy(x => random.Next()).ToList();
+
+        _gameState = new LieGameState
+        {
+            Items = shuffledItems,
+            CurrentItemIndex = 0,
+            CurrentItem = shuffledItems.FirstOrDefault(),
+            GameStarted = true,
+            Question = _quizData.Question,
+            TotalLies = _quizData.Items.Count(x => x.IsLie),
+            ItemStartTime = DateTime.Now,
+            SecondsUntilNextItem = 5
+        };
+
+        StartGameTimer();
+    }
+
+    [JSInvokable]
+    public async Task HandleKeyPress(string key)
+    {
+        if (!_gameState.GameEnded && !_gameState.ShowResult && (key == " " || key == "Enter"))
+        {
+            GuessLie();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task PlaySound(string soundType)
+    {
+        try
+        {
+            if (soundType == "correct")
+            {
+                await JSRuntime.InvokeVoidAsync("playCorrectSound");
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("playIncorrectSound");
+            }
+        }
+        catch
+        {
+            // Sound playback failed, continue silently
+        }
+    }
+
+    private void StartGameTimer()
+    {
+        _gameTimer?.Dispose();
+        _gameState.SecondsUntilNextItem = 5;
+        _gameTimer = new Timer(UpdateGameProgress, null, 0, 250); // Update every 250ms for countdown
+    }
+
+    private async void UpdateGameProgress(object? state)
+    {
+        if (_gameState.GameEnded || _gameState.ShowResult) return;
+
+        var now = DateTime.Now;
+        var timeSinceItemStart = now - _gameState.ItemStartTime;
+        var totalSeconds = timeSinceItemStart.TotalSeconds;
+
+        // Calculate seconds until next item
+        _gameState.SecondsUntilNextItem = Math.Max(0, 5 - (int)Math.Floor(totalSeconds));
+
+        // Check if we need to show the next item
+        if (totalSeconds >= 5)
+        {
+            // Move to next item (whether it was a lie or not - no result screen for missed lies)
+            SelectNextItem();
+            _gameState.ItemStartTime = DateTime.Now;
+            _gameState.SecondsUntilNextItem = 5;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void SelectNextItem()
+    {
+        // Move to next item in the shuffled list
+        _gameState.CurrentItemIndex++;
+        
+        if (_gameState.CurrentItemIndex >= _gameState.Items.Count)
+        {
+            // All items have been shown - game ends
+            _gameState.GameEnded = true;
+            _gameTimer?.Dispose();
+            return;
+        }
+
+        _gameState.CurrentItem = _gameState.Items[_gameState.CurrentItemIndex];
+        _gameState.ItemStartTime = DateTime.Now;
+        _gameState.SecondsUntilNextItem = 5;
+    }
+
+    private void GuessLie()
+    {
+        if (_gameState.CurrentItem == null) return;
+
+        _gameTimer?.Dispose();
+        _gameState.ShowResult = true;
+        _gameState.PlayerGuessedLie = true;
+
+        if (_gameState.CurrentItem.IsLie)
+        {
+            // Correct! It was a lie
+            _gameState.WasCorrectGuess = true;
+            _gameState.LiesFound++;
+            
+            _ = PlaySound("correct");
+        }
+        else
+        {
+            // Wrong! It was true
+            _gameState.WasCorrectGuess = false;
+            _ = PlaySound("incorrect");
+        }
+    }
+
+    private void ContinueGame()
+    {
+        _gameState.ShowResult = false;
+        _gameState.PlayerGuessedLie = false;
+
+        SelectNextItem();
+        
+        if (!_gameState.GameEnded)
+        {
+            _gameState.ItemStartTime = DateTime.Now;
+            StartGameTimer();
+        }
+    }
+
+    private async Task DownloadTemplate()
+    {
+        var template = new LieQuizData
+        {
+            Title = "Disney Characters",
+            Question = "I live in Entenhausen",
+            Hint = "Create items with names and mark lies with 'isLie': true. The question/topic helps players understand what to look for.",
+            Items = new List<LieQuizItem> 
+            { 
+                new() { Name = "Donald Duck", IsLie = false },
+                new() { Name = "Daisy Duck", IsLie = false },
+                new() { Name = "Scrooge McDuck", IsLie = false },
+                new() { Name = "Batman", IsLie = true },
+                new() { Name = "Huey Duck", IsLie = false },
+                new() { Name = "Superman", IsLie = true },
+                new() { Name = "Mickey Mouse", IsLie = false },
+                new() { Name = "Goofy", IsLie = false }
+            }
+        };
+
+        var json = JsonSerializer.Serialize(template, new JsonSerializerOptions { WriteIndented = true });
+        var bytes = System.Text.Encoding.UTF8.GetBytes(json);
+        var base64 = Convert.ToBase64String(bytes);
+        
+        await JSRuntime.InvokeVoidAsync("downloadFile", "lie-quiz-template.json", base64);
+    }
+
+    private async Task TriggerFileUpload()
+    {
+        if (fileInput != null)
+        {
+            await JSRuntime.InvokeVoidAsync("triggerFileInput", fileInput.Element);
+        }
+    }
+
+    private async Task TrackLieQuizStarted()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("trackPlausibleEvent", "lie-quiz-started", new { });
+        }
+        catch
+        {
+            // Analytics tracking failed, continue silently
+        }
+    }
+
+    private void RetryGame()
+    {
+        _gameTimer?.Dispose();
+        if (_quizData != null)
+        {
+            InitializeGame();
+        }
+    }
+
+    private void ResetGame()
+    {
+        _gameTimer?.Dispose();
+        _quizData = null;
+        _gameState = new LieGameState();
+        _errorMessage = string.Empty;
+    }
+} 

@@ -76,3 +76,46 @@ public class YearGameState
     public int SecondsUntilRangeIncrease { get; set; } = 10;
     public bool RangeJustUpdated { get; set; }
 }
+
+// Lie Quiz Models
+public class LieQuizData
+{
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = string.Empty;
+
+    [JsonPropertyName("question")]
+    public string Question { get; set; } = string.Empty;
+
+    [JsonPropertyName("_hint")]
+    public string Hint { get; set; } = string.Empty;
+
+    [JsonPropertyName("items")]
+    public List<LieQuizItem> Items { get; set; } = new();
+}
+
+public class LieQuizItem
+{
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = string.Empty;
+
+    [JsonPropertyName("isLie")]
+    public bool IsLie { get; set; }
+}
+
+public class LieGameState
+{
+    public List<LieQuizItem> Items { get; set; } = new();
+    public LieQuizItem? CurrentItem { get; set; }
+    public int CurrentItemIndex { get; set; }
+    public bool GameStarted { get; set; }
+    public bool GameEnded { get; set; }
+    public bool ShowResult { get; set; }
+    public bool PlayerGuessedLie { get; set; }
+    public bool WasCorrectGuess { get; set; }
+    public DateTime ItemStartTime { get; set; }
+    public int LiesFound { get; set; }
+    public int TotalLies { get; set; }
+    public bool AllLiesFound { get; set; }
+    public string Question { get; set; } = string.Empty;
+    public int SecondsUntilNextItem { get; set; } = 5;
+}

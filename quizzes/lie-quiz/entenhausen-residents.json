@@ -1,0 +1,71 @@
+{
+  "title": "Disney Characters",
+  "question": "I live in Entenhausen",
+  "_hint": "Entenhausen (Duckburg) is the fictional city where many Disney duck characters live. Spot the characters who don't belong!",
+  "items": [
+    {
+      "name": "Donald Duck",
+      "isLie": false
+    },
+    {
+      "name": "Daisy Duck",
+      "isLie": false
+    },
+    {
+      "name": "Scrooge McDuck",
+      "isLie": false
+    },
+    {
+      "name": "Batman",
+      "isLie": true
+    },
+    {
+      "name": "Huey Duck",
+      "isLie": false
+    },
+    {
+      "name": "Dewey Duck",
+      "isLie": false
+    },
+    {
+      "name": "Louie Duck",
+      "isLie": false
+    },
+    {
+      "name": "Superman",
+      "isLie": true
+    },
+    {
+      "name": "Gyro Gearloose",
+      "isLie": false
+    },
+    {
+      "name": "Gladstone Gander",
+      "isLie": false
+    },
+    {
+      "name": "Spider-Man",
+      "isLie": true
+    },
+    {
+      "name": "Launchpad McQuack",
+      "isLie": false
+    },
+    {
+      "name": "Wonder Woman",
+      "isLie": true
+    },
+    {
+      "name": "Magica De Spell",
+      "isLie": false
+    },
+    {
+      "name": "The Beagle Boys",
+      "isLie": false
+    },
+    {
+      "name": "Iron Man",
+      "isLie": true
+    }
+  ]
+} 

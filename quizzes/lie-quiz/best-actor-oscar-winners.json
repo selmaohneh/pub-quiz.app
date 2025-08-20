@@ -1,0 +1,79 @@
+{
+  "title": "Best Actor Oscar Winners",
+  "question": "Has a Best Actor Oscar",
+  "_hint": "These are actors who have won the Academy Award for Best Actor. Some have won multiple times, but spot the ones who have never won this specific award!",
+  "items": [
+    {
+      "name": "Daniel Day-Lewis",
+      "isLie": false
+    },
+    {
+      "name": "Jack Nicholson",
+      "isLie": false
+    },
+    {
+      "name": "Marlon Brando",
+      "isLie": false
+    },
+    {
+      "name": "Tom Hanks",
+      "isLie": false
+    },
+    {
+      "name": "Denzel Washington",
+      "isLie": false
+    },
+    {
+      "name": "Leonardo DiCaprio",
+      "isLie": false
+    },
+    {
+      "name": "Robert De Niro",
+      "isLie": false
+    },
+    {
+      "name": "Nicolas Cage",
+      "isLie": false
+    },
+    {
+      "name": "Will Smith",
+      "isLie": false
+    },
+    {
+      "name": "Rami Malek",
+      "isLie": false
+    },
+    {
+      "name": "Cillian Murphy",
+      "isLie": false
+    },
+    {
+      "name": "Dustin Hoffman",
+      "isLie": false
+    },
+    {
+      "name": "Jamie Foxx",
+      "isLie": false
+    },
+    {
+      "name": "Gene Hackman",
+      "isLie": false
+    },
+    {
+      "name": "Ian McKellen",
+      "isLie": true
+    },
+    {
+      "name": "Willem Dafoe",
+      "isLie": true
+    },
+    {
+      "name": "Samuel L. Jackson",
+      "isLie": true
+    },
+    {
+      "name": "Johnny Depp",
+      "isLie": true
+    }
+  ]
+} 
