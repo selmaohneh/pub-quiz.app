@@ -308,18 +308,14 @@ code {
 }
 
 .game-result {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
     padding: 2rem;
     box-sizing: border-box;
+    border-radius: 8px;
+    margin: 1rem 0;
 }
 
 .game-result.success {
@@ -380,15 +376,39 @@ code {
 }
 
 .sort-quiz-container {
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
     padding: 1rem;
+    position: relative;
 }
 
 .sort-quiz-container.playing {
-    height: 100vh;
+    min-height: 100vh;
     overflow: hidden;
+}
+
+/* New game result container that doesn't cover the full viewport */
+.game-result-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    box-sizing: border-box;
+    border-radius: 8px;
+    margin: 1rem 0;
+    max-width: 100%;
+    overflow: visible;
+}
+
+.game-result-container.success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.game-result-container.failure {
+    background: #f8d7da;
+    color: #721c24;
 }
 
 .quiz-setup {
@@ -558,6 +578,7 @@ code {
 @media (max-width: 768px) {
     .sort-quiz-container {
         padding: 0.5rem;
+        position: relative;
     }
     
     .quiz-row {

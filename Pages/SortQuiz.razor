@@ -139,7 +139,7 @@
         }
         else
         {
-            <div class="game-result @(_gameState.GameWon ? "success" : "failure")">
+            <div class="game-result-container @(_gameState.GameWon ? "success" : "failure")">
                 <h3>@(_gameState.GameWon ? "Congratulations! 🎉" : "Game Over 😔")</h3>
                 <p>@(_gameState.GameWon ? "You sorted all items correctly!" : "You made an incorrect placement.")</p>
                 
