@@ -1,8 +1,8 @@
 {
-  "title": "Meat Consumption per Country (2020)",
+  "title": "Meat Consumption per Country",
   "upperLabel": "Highest Consumption (kg/person/year)",
   "lowerLabel": "Lowest Consumption (kg/person/year)",
-  "description": "Sort countries from highest to lowest meat consumption per person per year (2020 data)",
+  "description": "Sort countries from highest to lowest meat consumption per person per year (2020)",
   "items": [
     "Hong Kong",
     "United States",

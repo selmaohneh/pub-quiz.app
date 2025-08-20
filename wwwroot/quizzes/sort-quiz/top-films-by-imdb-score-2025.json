@@ -1,8 +1,8 @@
 {
-  "title": "Top Films by IMDb Score (2025)",
+  "title": "IMDb Scores",
   "upperLabel": "Highest Rated",
   "lowerLabel": "Lowest Rated",
-  "description": "Sort films from highest to lowest IMDb rating (as of 2025)",
+  "description": "Sort films from highest to lowest IMDb rating (2025)",
   "items": [
     "The Shawshank Redemption",
     "The Godfather",
