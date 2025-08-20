@@ -1,8 +1,8 @@
 {
-  "title": "Age at Death of Famous Musicians",
+  "title": "Famous Musicians",
   "upperLabel": "Old",
   "lowerLabel": "Young",
-  "hint": "Sort musicians from oldest to youngest age at time of death",
+  "description": "Sort musicians from oldest to youngest age at time of death.",
   "items": [
     "Tina Turner",
     "Ozzy Osbourne",

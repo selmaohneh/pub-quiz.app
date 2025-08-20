@@ -1,8 +1,8 @@
 {
-  "title": "Beer Brands by Global Sales Volume",
+  "title": "Beer Brands",
   "upperLabel": "Highest Sales",
   "lowerLabel": "Lowest Sales",
-  "hint": "Sort beer brands from highest to lowest global sales volume",
+  "description": "Sort beer brands from highest to lowest global sales volume.",
   "items": [
     "Snow",
     "Budweiser",

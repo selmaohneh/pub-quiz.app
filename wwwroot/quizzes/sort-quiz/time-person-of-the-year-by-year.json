@@ -2,7 +2,7 @@
   "title": "Time Person of the Year by Year",
   "upperLabel": "Most Recent",
   "lowerLabel": "Oldest",
-  "hint": "Sort Time Person of the Year winners from most recent to oldest year",
+  "description": "Sort Time Person of the Year winners from most recent to oldest year",
   "items": [
     "Taylor Swift",
     "Volodymyr Zelenskyy",

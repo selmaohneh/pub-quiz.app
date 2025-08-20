@@ -13,8 +13,8 @@ public class SortQuizData
     [JsonPropertyName("lowerLabel")]
     public string LowerLabel { get; set; } = string.Empty;
 
-    [JsonPropertyName("_hint")]
-    public string Hint { get; set; } = string.Empty;
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = string.Empty;
 
     [JsonPropertyName("items")]
     public List<string> Items { get; set; } = new();
@@ -43,8 +43,8 @@ public class YearQuizData
     [JsonPropertyName("title")]
     public string Title { get; set; } = string.Empty;
 
-    [JsonPropertyName("_hint")]
-    public string Hint { get; set; } = string.Empty;
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = string.Empty;
 
     [JsonPropertyName("items")]
     public List<YearQuizItem> Items { get; set; } = new();
@@ -86,8 +86,8 @@ public class LieQuizData
     [JsonPropertyName("question")]
     public string Question { get; set; } = string.Empty;
 
-    [JsonPropertyName("_hint")]
-    public string Hint { get; set; } = string.Empty;
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = string.Empty;
 
     [JsonPropertyName("items")]
     public List<LieQuizItem> Items { get; set; } = new();

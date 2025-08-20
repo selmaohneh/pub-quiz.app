@@ -2,7 +2,7 @@
   "title": "Most Visited Cities by International Visitors (2024)",
   "upperLabel": "Most Visitors",
   "lowerLabel": "Fewest Visitors",
-  "hint": "Sort cities from most to fewest international visitors in 2024",
+  "description": "Sort cities from most to fewest international visitors in 2024",
   "items": [
     "Bangkok",
     "Istanbul", 

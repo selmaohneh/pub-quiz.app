@@ -2,7 +2,7 @@
   "title": "Best-Selling Albums by Millions Sold",
   "upperLabel": "Most Sales",
   "lowerLabel": "Fewest Sales",
-  "hint": "Sort albums from highest to lowest sales in millions of copies sold",
+  "description": "Sort albums from highest to lowest sales in millions of copies sold",
   "items": [
     "21 - Adele",
     "25 - Adele",

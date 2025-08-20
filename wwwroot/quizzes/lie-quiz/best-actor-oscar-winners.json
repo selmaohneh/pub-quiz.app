@@ -1,7 +1,7 @@
 {
-  "title": "Best Actor Oscar Winners",
+  "title": "Oscar Winners",
   "question": "Has a Best Actor Oscar",
-  "_hint": "These are actors who have won the Academy Award for Best Actor. Some have won multiple times, but spot the ones who have never won this specific award!",
+  "description": "These are actors who have won the Academy Award for Best Actor. Spot the ones who have never won this award!",
   "items": [
     {
       "name": "Daniel Day-Lewis",

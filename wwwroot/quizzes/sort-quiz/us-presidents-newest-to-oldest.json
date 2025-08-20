@@ -2,7 +2,7 @@
   "title": "US Presidents",
   "upperLabel": "Newest",
   "lowerLabel": "Oldest",
-  "hint": "Sort US Presidents from newest (current) to oldest (first president)",
+  "description": "Sort US Presidents from newest (current) to oldest (first president)",
   "items": [
     "Joe Biden",
     "Donald Trump",

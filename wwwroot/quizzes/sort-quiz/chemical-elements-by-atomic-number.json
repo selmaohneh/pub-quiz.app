@@ -2,7 +2,7 @@
   "title": "Chemical Elements by Atomic Number",
   "upperLabel": "Highest Atomic Number",
   "lowerLabel": "Lowest Atomic Number",
-  "hint": "Sort chemical elements from highest to lowest atomic number (number of protons)",
+  "description": "Sort chemical elements from highest to lowest atomic number (number of protons)",
   "items": [
     "Neodymium",
     "Praseodymium",

@@ -1,0 +1,50 @@
+{
+  "title": "History",
+  "description": "Guess the year of important historical events.",
+  "items": [
+    {
+      "title": "Fall of the Berlin Wall",
+      "year": 1989
+    },
+    {
+      "title": "Facebook Founded",
+      "year": 2004
+    },
+    {
+      "title": "Obama becomes President",
+      "year": 2009
+    },
+    {
+      "title": "Moon Landing",
+      "year": 1969
+    },
+    {
+      "title": "First Coca-Cola Bottled",
+      "year": 1894
+    },
+    {
+      "title": "Penicillin Invented",
+      "year": 1928
+    },
+    {
+      "title": "Kurt Cobain's Death",
+      "year": 1994
+    },
+    {
+      "title": "The Beatles Form",
+      "year": 1960
+    },
+    {
+      "title": "Peak of Cuban Missile Crisis",
+      "year": 1962
+    },
+    {
+      "title": "Coronation of Charlemagne",
+      "year": 800
+    },
+    {
+      "title": "Declaration of Independence",
+      "year": 1776
+    }
+  ]
+} 

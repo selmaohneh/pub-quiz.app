@@ -2,7 +2,7 @@
   "title": "World Religions by Population",
   "upperLabel": "Most Followers",
   "lowerLabel": "Fewest Followers",
-  "hint": "Sort world religions from most to fewest followers globally",
+  "description": "Sort world religions from most to fewest followers globally",
   "items": [
     "Christianity",
     "Islam", 

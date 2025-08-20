@@ -2,7 +2,7 @@
   "title": "Countries by Active Military Personnel (2025)",
   "upperLabel": "Most Personnel",
   "lowerLabel": "Fewest Personnel",
-  "hint": "Sort countries from highest to lowest number of active military personnel (2025 estimates)",
+  "description": "Sort countries from highest to lowest number of active military personnel (2025 estimates)",
   "items": [
     "China",
     "India", 

@@ -1,8 +1,8 @@
 {
-  "title": "Animal Maximum Lifespans",
+  "title": "Animals",
   "upperLabel": "Longest Lived",
   "lowerLabel": "Shortest Lived",
-  "hint": "Sort animals from longest to shortest maximum lifespan in the wild",
+  "description": "Sort animals from longest to shortest maximum lifespan in the wild.",
   "items": [
     "American Alligator",
     "Andean Condor",

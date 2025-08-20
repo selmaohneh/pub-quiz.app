@@ -2,7 +2,7 @@
   "title": "German Bundesliga 2024/25 Final Table",
   "upperLabel": "Highest Position",
   "lowerLabel": "Lowest Position",
-  "hint": "Sort teams from 1st place to 18th place in the final Bundesliga table",
+  "description": "Sort teams from 1st place to 18th place in the final Bundesliga table",
   "items": [
     "FC Bayern München",
     "Bayer 04 Leverkusen",

@@ -29,7 +29,7 @@
                                 var quiz = _displayedQuizzes[i + j];
                                 <div class="quiz-card" @onclick="() => LoadQuiz(quiz)">
                                     <h4>@quiz.Title</h4>
-                                    <p>@quiz.Hint</p>
+                                    <p>@quiz.Description</p>
                                 </div>
                             }
                         </div>
@@ -599,7 +599,7 @@
             Title = "Animal sizes",
             UpperLabel = "Big",
             LowerLabel = "Small",
-            Hint = "List at least 2 items from upperLabel → lowerLabel. If more than 20 items are provided, 20 random items will be selected.",
+            Description = "Sort animals from largest to smallest. List at least 2 items from upperLabel → lowerLabel. If more than 20 items are provided, 20 random items will be selected.",
             Items = new List<string> { "Elephant", "Dog", "Cat", "Raven", "Mouse", "Spider", "Ant" }
         };
 

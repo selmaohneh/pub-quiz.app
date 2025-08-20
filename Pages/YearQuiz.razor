@@ -1,6 +1,7 @@
 @page "/year-quiz"
 @using pub_quiz.Models
 @using System.Text.Json
+@using System.Text.RegularExpressions
 @inject IJSRuntime JSRuntime
 @inject HttpClient Http
 @implements IAsyncDisposable
@@ -14,14 +15,43 @@
             <h2>📅 Year Quiz</h2>
             <p class="lead">Guess the year of historical events. How close can you get?</p>
             
-            <div class="how-to-play">
-                <h3>How to Play</h3>
+            <!-- Community Quiz Section -->
+            <div class="community-quiz-section">
+                <h3>Play a Community Quiz 🎮</h3>
+                <p>Choose from our collection of community-created year quizzes:</p>
+                
+                <div class="quiz-grid">
+                    @for (int i = 0; i < _displayedQuizzes.Count; i += 3)
+                    {
+                        <div class="quiz-row">
+                            @for (int j = 0; j < 3 && (i + j) < _displayedQuizzes.Count; j++)
+                            {
+                                var quiz = _displayedQuizzes[i + j];
+                                <div class="quiz-card" @onclick="() => LoadQuiz(quiz)">
+                                    <h4>@quiz.Title</h4>
+                                    <p>@quiz.Description</p>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+                
+                <div class="quiz-navigation">
+                    <button class="btn btn-outline-primary" @onclick="ShowMoreQuizzes">
+                        🎲 Show More Quizzes
+                    </button>
+                </div>
+            </div>
+            
+            <div class="create-your-own-section">
+                <h3>Create Your Own Year Quiz 🛠️</h3>
                 <div class="instructions">
                     <div class="instruction-step">
                         <span class="step-number">1</span>
                         <div class="step-content">
                             <h4>Download the template</h4>
                             <p>Get the JSON template file to create your own year quiz</p>
+                            <button class="btn btn-primary" @onclick="DownloadTemplate">Download Template</button>
                         </div>
                     </div>
                     <div class="instruction-step">
@@ -29,32 +59,24 @@
                         <div class="step-content">
                             <h4>Create your quiz</h4>
                             <p>Edit the JSON file with titles and years (0-9999). Each item needs a title and the correct year.</p>
-                            <p><strong>💡 Tip:</strong> You can also find ready-made quizzes in our <a href="https://github.com/selmaohneh/pub-quiz.app/tree/master/quizzes" target="_blank">GitHub quizzes folder</a>!</p>
                         </div>
                     </div>
                     <div class="instruction-step">
                         <span class="step-number">3</span>
                         <div class="step-content">
-                            <h4>Watch the timer</h4>
-                            <p>A progress bar fills every 10 seconds. The longer you wait, the bigger the acceptable range becomes (±0, ±1, ±2, etc.)</p>
+                            <h4>Upload and play</h4>
+                            <p>Watch the timer and press "Stop & Guess" when you're ready to make your guess!</p>
+                            <button class="btn btn-success" @onclick="TriggerFileUpload">Upload and Play</button>
+                            <InputFile @ref="fileInput" OnChange="HandleFileUpload" accept=".json" style="display: none;" />
                         </div>
                     </div>
                     <div class="instruction-step">
                         <span class="step-number">4</span>
                         <div class="step-content">
-                            <h4>Stop and guess</h4>
-                            <p>Press "Stop & Guess" and enter your year. If you're within the current range, you win!</p>
+                            <h4>Share with the community</h4>
+                            <p>Add your quiz to our <a href="https://github.com/selmaohneh/pub-quiz.app/tree/master/quizzes/year-quiz" target="_blank">GitHub repository</a> so others can enjoy it too!</p>
                         </div>
                     </div>
-                </div>
-            </div>
-            
-            <div class="upload-section">
-                <div class="button-group">
-                    <button class="btn btn-primary" @onclick="DownloadTemplate">Download Template</button>
-                    <button class="btn btn-success" @onclick="TriggerFileUpload">Upload and Play</button>
-                    <button class="btn btn-info" @onclick="LoadRandomQuiz" disabled="@_isLoadingRandom">@(_isLoadingRandom ? "Loading..." : "🎲 Random Quiz")</button>
-                    <InputFile @ref="fileInput" OnChange="HandleFileUpload" accept=".json" style="display: none;" />
                 </div>
             </div>
             
@@ -294,11 +316,15 @@
     private InputFile? fileInput;
     private Timer? _gameTimer;
     private int _yearGuessInput;
-    private bool _isLoadingRandom = false;
+    private List<YearQuizData> _allQuizzes = new();
+    private List<YearQuizData> _displayedQuizzes = new();
+    private Random _random = new();
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        await LoadAllQuizzes();
+        ShowRandomQuizzes();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -324,6 +350,135 @@
     {
         _gameTimer?.Dispose();
         await JSRuntime.InvokeVoidAsync("removeKeyboardListeners");
+    }
+
+    private async Task LoadAllQuizzes()
+    {
+        try
+        {
+            // Get the list of JSON files from the quizzes directory
+            var quizFilesResponse = await Http.GetAsync("quizzes/year-quiz/");
+            if (!quizFilesResponse.IsSuccessStatusCode)
+            {
+                // If we can't get the directory listing, fall back to a known list
+                await LoadQuizzesFromKnownList();
+                return;
+            }
+
+            var htmlContent = await quizFilesResponse.Content.ReadAsStringAsync();
+            
+            // Parse the HTML directory listing to extract JSON filenames
+            var quizFiles = ExtractJsonFilesFromHtml(htmlContent);
+            
+            if (quizFiles.Count == 0)
+            {
+                // Fallback to known list if no files found
+                await LoadQuizzesFromKnownList();
+                return;
+            }
+
+            _allQuizzes.Clear();
+            foreach (var quizFile in quizFiles)
+            {
+                try
+                {
+                    var json = await Http.GetStringAsync($"quizzes/year-quiz/{quizFile}");
+                    var quiz = JsonSerializer.Deserialize<YearQuizData>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    if (quiz != null)
+                    {
+                        _allQuizzes.Add(quiz);
+                    }
+                }
+                catch
+                {
+                    // Skip quizzes that can't be loaded
+                }
+            }
+        }
+        catch
+        {
+            // Handle error silently and fall back to known list
+            await LoadQuizzesFromKnownList();
+        }
+    }
+
+    private List<string> ExtractJsonFilesFromHtml(string htmlContent)
+    {
+        var quizFiles = new List<string>();
+        
+        // Simple regex to extract JSON filenames from HTML directory listing
+        var pattern = @"href=""([^""]*\.json)""";
+        var matches = Regex.Matches(htmlContent, pattern);
+        
+        foreach (Match match in matches)
+        {
+            if (match.Groups.Count > 1)
+            {
+                var filename = match.Groups[1].Value;
+                if (filename.EndsWith(".json"))
+                {
+                    quizFiles.Add(filename);
+                }
+            }
+        }
+        
+        return quizFiles;
+    }
+
+    private async Task LoadQuizzesFromKnownList()
+    {
+        // Fallback method with known quiz files
+        var quizFiles = new[]
+        {
+            "german-historical-events.json"
+        };
+
+        _allQuizzes.Clear();
+        foreach (var quizFile in quizFiles)
+        {
+            try
+            {
+                var json = await Http.GetStringAsync($"quizzes/year-quiz/{quizFile}");
+                var quiz = JsonSerializer.Deserialize<YearQuizData>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (quiz != null)
+                {
+                    _allQuizzes.Add(quiz);
+                }
+            }
+            catch
+            {
+                // Skip quizzes that can't be loaded
+            }
+        }
+    }
+
+    private void ShowRandomQuizzes()
+    {
+        var shuffled = _allQuizzes.OrderBy(x => _random.Next()).ToList();
+        _displayedQuizzes = shuffled.Take(3).ToList();
+    }
+
+    private void ShowMoreQuizzes()
+    {
+        var currentQuizzes = _displayedQuizzes.ToList();
+        var remainingQuizzes = _allQuizzes.Except(currentQuizzes).ToList();
+        
+        if (remainingQuizzes.Count == 0)
+        {
+            // If no more quizzes, start over
+            ShowRandomQuizzes();
+            return;
+        }
+        
+        var newQuizzes = remainingQuizzes.OrderBy(x => _random.Next()).Take(3).ToList();
+        _displayedQuizzes = newQuizzes;
+    }
+
+    private async Task LoadQuiz(YearQuizData quiz)
+    {
+        _quizData = quiz;
+        InitializeGame();
+        await TrackYearQuizStarted();
     }
 
     private async Task HandleFileUpload(InputFileChangeEventArgs e)
@@ -589,7 +744,7 @@
         var template = new YearQuizData
         {
             Title = "Historical Events",
-            Hint = "Add titles and years (0-9999) for historical events, inventions, or any time-based quiz.",
+            Description = "Guess the year of major historical events. The longer you wait, the bigger the acceptable range becomes. Press 'Stop & Guess' when you're ready to make your prediction.",
             Items = new List<YearQuizItem> 
             { 
                 new() { Title = "Fall of the Berlin Wall", Year = 1989 },
@@ -626,26 +781,7 @@
         }
     }
 
-    private Task LoadRandomQuiz()
-    {
-        _isLoadingRandom = true;
-        _errorMessage = string.Empty;
-        try
-        {
-            // Currently no year quiz files available
-            _errorMessage = "No ready-made year quizzes available yet. Please upload your own quiz file or check back later!";
-        }
-        catch (Exception ex)
-        {
-            _errorMessage = $"Error loading random quiz: {ex.Message}";
-        }
-        finally
-        {
-            _isLoadingRandom = false;
-        }
-        
-        return Task.CompletedTask;
-    }
+
 
     private void ResetGame()
     {
@@ -654,6 +790,7 @@
         _gameState = new YearGameState();
         _errorMessage = string.Empty;
         _yearGuessInput = 0;
+        ShowRandomQuizzes();
     }
 
 

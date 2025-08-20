@@ -1,6 +1,7 @@
 @page "/lie-quiz"
 @using pub_quiz.Models
 @using System.Text.Json
+@using System.Text.RegularExpressions
 @inject IJSRuntime JSRuntime
 @inject HttpClient Http
 @implements IAsyncDisposable
@@ -14,14 +15,43 @@
             <h2>🤥 Who Lies?</h2>
             <p class="lead">Spot the lies among the truths! Press space or enter when you see something that doesn't belong.</p>
             
-            <div class="how-to-play">
-                <h3>How to Play</h3>
+            <!-- Community Quiz Section -->
+            <div class="community-quiz-section">
+                <h3>Play a Community Quiz 🎮</h3>
+                <p>Choose from our collection of community-created lie quizzes:</p>
+                
+                <div class="quiz-grid">
+                    @for (int i = 0; i < _displayedQuizzes.Count; i += 3)
+                    {
+                        <div class="quiz-row">
+                            @for (int j = 0; j < 3 && (i + j) < _displayedQuizzes.Count; j++)
+                            {
+                                var quiz = _displayedQuizzes[i + j];
+                                <div class="quiz-card" @onclick="() => LoadQuiz(quiz)">
+                                    <h4>@quiz.Title</h4>
+                                    <p>@quiz.Description</p>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+                
+                <div class="quiz-navigation">
+                    <button class="btn btn-outline-primary" @onclick="ShowMoreQuizzes">
+                        🎲 Show More Quizzes
+                    </button>
+                </div>
+            </div>
+            
+            <div class="create-your-own-section">
+                <h3>Create Your Own Lie Quiz 🛠️</h3>
                 <div class="instructions">
                     <div class="instruction-step">
                         <span class="step-number">1</span>
                         <div class="step-content">
                             <h4>Download the template</h4>
                             <p>Get the JSON template file to create your own lie quiz</p>
+                            <button class="btn btn-primary" @onclick="DownloadTemplate">Download Template</button>
                         </div>
                     </div>
                     <div class="instruction-step">
@@ -34,26 +64,19 @@
                     <div class="instruction-step">
                         <span class="step-number">3</span>
                         <div class="step-content">
-                            <h4>Watch the items</h4>
-                            <p>Items appear every 5 seconds. Most are true, but some are lies!</p>
+                            <h4>Upload and play</h4>
+                            <p>Items appear every 5 seconds. Press Space, Enter, or click "That's a Lie!" when you spot a false statement!</p>
+                            <button class="btn btn-success" @onclick="TriggerFileUpload">Upload and Play</button>
+                            <InputFile @ref="fileInput" OnChange="HandleFileUpload" accept=".json" style="display: none;" />
                         </div>
                     </div>
                     <div class="instruction-step">
                         <span class="step-number">4</span>
                         <div class="step-content">
-                            <h4>Spot the lie</h4>
-                            <p>Press Space, Enter, or click the "That's a Lie!" button when you see something false</p>
+                            <h4>Share with the community</h4>
+                            <p>Add your quiz to our <a href="https://github.com/selmaohneh/pub-quiz.app/tree/master/quizzes/lie-quiz" target="_blank">GitHub repository</a> so others can enjoy it too!</p>
                         </div>
                     </div>
-                </div>
-            </div>
-            
-            <div class="upload-section">
-                <div class="button-group">
-                    <button class="btn btn-primary" @onclick="DownloadTemplate">Download Template</button>
-                    <button class="btn btn-success" @onclick="TriggerFileUpload">Upload and Play</button>
-                    <button class="btn btn-info" @onclick="LoadRandomQuiz" disabled="@_isLoadingRandom">@(_isLoadingRandom ? "Loading..." : "🎲 Random Quiz")</button>
-                    <InputFile @ref="fileInput" OnChange="HandleFileUpload" accept=".json" style="display: none;" />
                 </div>
             </div>
             
@@ -321,11 +344,15 @@
     private string _errorMessage = string.Empty;
     private InputFile? fileInput;
     private Timer? _gameTimer;
-    private bool _isLoadingRandom = false;
+    private List<LieQuizData> _allQuizzes = new();
+    private List<LieQuizData> _displayedQuizzes = new();
+    private Random _random = new();
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        await LoadAllQuizzes();
+        ShowRandomQuizzes();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -394,6 +421,136 @@
         {
             _errorMessage = $"Error loading file: {ex.Message}";
         }
+    }
+
+    private async Task LoadAllQuizzes()
+    {
+        try
+        {
+            // Get the list of JSON files from the quizzes directory
+            var quizFilesResponse = await Http.GetAsync("quizzes/lie-quiz/");
+            if (!quizFilesResponse.IsSuccessStatusCode)
+            {
+                // If we can't get the directory listing, fall back to a known list
+                await LoadQuizzesFromKnownList();
+                return;
+            }
+
+            var htmlContent = await quizFilesResponse.Content.ReadAsStringAsync();
+            
+            // Parse the HTML directory listing to extract JSON filenames
+            var quizFiles = ExtractJsonFilesFromHtml(htmlContent);
+            
+            if (quizFiles.Count == 0)
+            {
+                // Fallback to known list if no files found
+                await LoadQuizzesFromKnownList();
+                return;
+            }
+
+            _allQuizzes.Clear();
+            foreach (var quizFile in quizFiles)
+            {
+                try
+                {
+                    var json = await Http.GetStringAsync($"quizzes/lie-quiz/{quizFile}");
+                    var quiz = JsonSerializer.Deserialize<LieQuizData>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    if (quiz != null)
+                    {
+                        _allQuizzes.Add(quiz);
+                    }
+                }
+                catch
+                {
+                    // Skip quizzes that can't be loaded
+                }
+            }
+        }
+        catch
+        {
+            // Handle error silently and fall back to known list
+            await LoadQuizzesFromKnownList();
+        }
+    }
+
+    private List<string> ExtractJsonFilesFromHtml(string htmlContent)
+    {
+        var quizFiles = new List<string>();
+        
+        // Simple regex to extract JSON filenames from HTML directory listing
+        var pattern = @"href=""([^""]*\.json)""";
+        var matches = Regex.Matches(htmlContent, pattern);
+        
+        foreach (Match match in matches)
+        {
+            if (match.Groups.Count > 1)
+            {
+                var filename = match.Groups[1].Value;
+                if (filename.EndsWith(".json"))
+                {
+                    quizFiles.Add(filename);
+                }
+            }
+        }
+        
+        return quizFiles;
+    }
+
+    private async Task LoadQuizzesFromKnownList()
+    {
+        // Fallback method with known quiz files
+        var quizFiles = new[]
+        {
+            "best-actor-oscar-winners.json",
+            "entenhausen-residents.json"
+        };
+
+        _allQuizzes.Clear();
+        foreach (var quizFile in quizFiles)
+        {
+            try
+            {
+                var json = await Http.GetStringAsync($"quizzes/lie-quiz/{quizFile}");
+                var quiz = JsonSerializer.Deserialize<LieQuizData>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (quiz != null)
+                {
+                    _allQuizzes.Add(quiz);
+                }
+            }
+            catch
+            {
+                // Skip quizzes that can't be loaded
+            }
+        }
+    }
+
+    private void ShowRandomQuizzes()
+    {
+        var shuffled = _allQuizzes.OrderBy(x => _random.Next()).ToList();
+        _displayedQuizzes = shuffled.Take(3).ToList();
+    }
+
+    private void ShowMoreQuizzes()
+    {
+        var currentQuizzes = _displayedQuizzes.ToList();
+        var remainingQuizzes = _allQuizzes.Except(currentQuizzes).ToList();
+        
+        if (remainingQuizzes.Count == 0)
+        {
+            // If no more quizzes, start over
+            ShowRandomQuizzes();
+            return;
+        }
+        
+        var newQuizzes = remainingQuizzes.OrderBy(x => _random.Next()).Take(3).ToList();
+        _displayedQuizzes = newQuizzes;
+    }
+
+    private async Task LoadQuiz(LieQuizData quiz)
+    {
+        _quizData = quiz;
+        InitializeGame();
+        await TrackLieQuizStarted();
     }
 
     private async void InitializeGame()
@@ -550,7 +707,7 @@
         {
             Title = "Disney Characters",
             Question = "I live in Entenhausen",
-            Hint = "Create items with names and mark lies with 'isLie': true. The question/topic helps players understand what to look for.",
+            Description = "Spot the lies among the truths! Most items are true, but some are lies. Press Space, Enter, or click 'That's a Lie!' when you spot something false.",
             Items = new List<LieQuizItem> 
             { 
                 new() { Name = "Donald Duck", IsLie = false },
@@ -600,68 +757,12 @@
         }
     }
 
-    private async Task LoadRandomQuiz()
-    {
-        _isLoadingRandom = true;
-        _errorMessage = string.Empty;
-        try
-        {
-            // List of available lie quiz files in wwwroot/quizzes/lie-quiz/
-            var quizFiles = new[]
-            {
-                "best-actor-oscar-winners.json",
-                "entenhausen-residents.json"
-            };
-
-            if (quizFiles.Length == 0)
-            {
-                _errorMessage = "No ready-made lie quizzes found.";
-                return;
-            }
-
-            var random = new Random();
-            var randomQuizFile = quizFiles[random.Next(quizFiles.Length)];
-            
-            // Fetch the JSON file via HTTP
-            var json = await Http.GetStringAsync($"quizzes/lie-quiz/{randomQuizFile}");
-            _quizData = JsonSerializer.Deserialize<LieQuizData>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-            if (_quizData == null)
-            {
-                _errorMessage = "Invalid JSON format for random quiz.";
-                return;
-            }
-
-            if (_quizData.Items.Count < 2)
-            {
-                _errorMessage = "Random quiz must have at least 2 items.";
-                return;
-            }
-
-            if (!_quizData.Items.Any(x => x.IsLie))
-            {
-                _errorMessage = "Random quiz must have at least one lie (isLie: true).";
-                return;
-            }
-
-            InitializeGame();
-            await TrackLieQuizStarted();
-        }
-        catch (Exception ex)
-        {
-            _errorMessage = $"Error loading random quiz: {ex.Message}";
-        }
-        finally
-        {
-            _isLoadingRandom = false;
-        }
-    }
-
     private void ResetGame()
     {
         _gameTimer?.Dispose();
         _quizData = null;
         _gameState = new LieGameState();
         _errorMessage = string.Empty;
+        ShowRandomQuizzes();
     }
 } 

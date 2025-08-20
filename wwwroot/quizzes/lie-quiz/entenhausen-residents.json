@@ -1,7 +1,7 @@
 {
   "title": "Disney Characters",
-  "question": "I live in Entenhausen",
-  "_hint": "Entenhausen (Duckburg) is the fictional city where many Disney duck characters live. Spot the characters who don't belong!",
+  "question": "I live in Duckburg",
+  "description": "Duckburg is the fictional city where many Disney duck characters live. Spot the characters who don't belong!",
   "items": [
     {
       "name": "Donald Duck",
