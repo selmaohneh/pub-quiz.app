@@ -13,6 +13,8 @@ def update_manifest(quiz_type):
     """Update manifest for a specific quiz type."""
     quiz_dir = Path(f'wwwroot/quizzes/{quiz_type}')
     
+    print(f"Processing {quiz_type} at path: {quiz_dir.absolute()}")
+    
     if not quiz_dir.exists():
         print(f"Warning: Directory {quiz_dir} does not exist")
         return
@@ -20,19 +22,29 @@ def update_manifest(quiz_type):
     # Get all JSON files except manifest.json
     quiz_files = [f.name for f in quiz_dir.glob('*.json') if f.name != 'manifest.json']
     
+    print(f"Found {len(quiz_files)} JSON files in {quiz_type}: {quiz_files}")
+    
     # Sort alphabetically
     quiz_files.sort()
     
     # Write manifest
     manifest_path = quiz_dir / 'manifest.json'
-    with open(manifest_path, 'w') as f:
-        json.dump(quiz_files, f, indent=2)
+    try:
+        with open(manifest_path, 'w') as f:
+            json.dump(quiz_files, f, indent=2)
+        print(f"Successfully wrote manifest to {manifest_path}")
+    except Exception as e:
+        print(f"Error writing manifest: {e}")
+        return
     
     print(f"Updated {quiz_type} manifest with {len(quiz_files)} files: {quiz_files}")
 
 def main():
     """Update manifests for all quiz types."""
     quiz_types = ['sort-quiz', 'lie-quiz', 'year-quiz']
+    
+    print(f"Starting manifest update for quiz types: {quiz_types}")
+    print(f"Current working directory: {Path.cwd()}")
     
     for quiz_type in quiz_types:
         update_manifest(quiz_type)
