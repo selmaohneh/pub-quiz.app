@@ -2,6 +2,7 @@
 @using pub_quiz.Models
 @using System.Text.Json
 @inject IJSRuntime JSRuntime
+@inject HttpClient Http
 @implements IAsyncDisposable
 
 <PageTitle>Who Lies? Quiz | Pub-Quiz App</PageTitle>
@@ -51,6 +52,7 @@
                 <div class="button-group">
                     <button class="btn btn-primary" @onclick="DownloadTemplate">Download Template</button>
                     <button class="btn btn-success" @onclick="TriggerFileUpload">Upload and Play</button>
+                    <button class="btn btn-info" @onclick="LoadRandomQuiz" disabled="@_isLoadingRandom">@(_isLoadingRandom ? "Loading..." : "🎲 Random Quiz")</button>
                     <InputFile @ref="fileInput" OnChange="HandleFileUpload" accept=".json" style="display: none;" />
                 </div>
             </div>
@@ -319,6 +321,7 @@
     private string _errorMessage = string.Empty;
     private InputFile? fileInput;
     private Timer? _gameTimer;
+    private bool _isLoadingRandom = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -393,7 +396,7 @@
         }
     }
 
-    private void InitializeGame()
+    private async void InitializeGame()
     {
         if (_quizData == null) return;
 
@@ -414,6 +417,9 @@
         };
 
         StartGameTimer();
+        
+        // Play sound for the first item appearance
+        await PlaySound("itemTransition");
     }
 
     [JSInvokable]
@@ -434,9 +440,13 @@
             {
                 await JSRuntime.InvokeVoidAsync("playCorrectSound");
             }
-            else
+            else if (soundType == "incorrect")
             {
                 await JSRuntime.InvokeVoidAsync("playIncorrectSound");
+            }
+            else if (soundType == "itemTransition")
+            {
+                await JSRuntime.InvokeVoidAsync("playRangeUpdateSound");
             }
         }
         catch
@@ -475,7 +485,7 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    private void SelectNextItem()
+    private async void SelectNextItem()
     {
         // Move to next item in the shuffled list
         _gameState.CurrentItemIndex++;
@@ -491,6 +501,9 @@
         _gameState.CurrentItem = _gameState.Items[_gameState.CurrentItemIndex];
         _gameState.ItemStartTime = DateTime.Now;
         _gameState.SecondsUntilNextItem = 5;
+        
+        // Play sound for new item appearance
+        await PlaySound("itemTransition");
     }
 
     private void GuessLie()
@@ -584,6 +597,63 @@
         if (_quizData != null)
         {
             InitializeGame();
+        }
+    }
+
+    private async Task LoadRandomQuiz()
+    {
+        _isLoadingRandom = true;
+        _errorMessage = string.Empty;
+        try
+        {
+            // List of available lie quiz files in wwwroot/quizzes/lie-quiz/
+            var quizFiles = new[]
+            {
+                "best-actor-oscar-winners.json",
+                "entenhausen-residents.json"
+            };
+
+            if (quizFiles.Length == 0)
+            {
+                _errorMessage = "No ready-made lie quizzes found.";
+                return;
+            }
+
+            var random = new Random();
+            var randomQuizFile = quizFiles[random.Next(quizFiles.Length)];
+            
+            // Fetch the JSON file via HTTP
+            var json = await Http.GetStringAsync($"quizzes/lie-quiz/{randomQuizFile}");
+            _quizData = JsonSerializer.Deserialize<LieQuizData>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (_quizData == null)
+            {
+                _errorMessage = "Invalid JSON format for random quiz.";
+                return;
+            }
+
+            if (_quizData.Items.Count < 2)
+            {
+                _errorMessage = "Random quiz must have at least 2 items.";
+                return;
+            }
+
+            if (!_quizData.Items.Any(x => x.IsLie))
+            {
+                _errorMessage = "Random quiz must have at least one lie (isLie: true).";
+                return;
+            }
+
+            InitializeGame();
+            await TrackLieQuizStarted();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error loading random quiz: {ex.Message}";
+        }
+        finally
+        {
+            _isLoadingRandom = false;
         }
     }
 

@@ -403,11 +403,68 @@ code {
     margin-bottom: 2rem;
 }
 
-.how-to-play {
+.community-quiz-section {
     margin-bottom: 3rem;
 }
 
-.how-to-play h3 {
+.community-quiz-section h3 {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.quiz-grid {
+    margin-bottom: 2rem;
+}
+
+.quiz-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.quiz-card {
+    flex: 1;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.quiz-card:hover {
+    border-color: #007bff;
+    background: #e3f2fd;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+}
+
+.quiz-card h4 {
+    margin: 0 0 0.5rem 0;
+    color: #007bff;
+    font-size: 1.1rem;
+}
+
+.quiz-card p {
+    margin: 0;
+    color: #666;
+    line-height: 1.4;
+    font-size: 0.9rem;
+}
+
+.quiz-navigation {
+    text-align: center;
+}
+
+.create-your-own-section {
+    margin-bottom: 3rem;
+}
+
+.create-your-own-section h3 {
     margin-bottom: 2rem;
     color: #333;
 }
@@ -474,12 +531,43 @@ code {
     max-width: 200px;
 }
 
+/* Random quiz button specific styling */
+.btn-info {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    border-color: #117a8b;
+    transition: all 0.3s ease;
+}
+
+.btn-info:hover {
+    background: linear-gradient(135deg, #138496, #117a8b);
+    border-color: #10707f;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
+}
+
+.btn-info:disabled {
+    background: #6c757d;
+    border-color: #6c757d;
+    transform: none;
+    box-shadow: none;
+}
+
 /* Fixed sizing - no dynamic classes needed */
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .sort-quiz-container {
         padding: 0.5rem;
+    }
+    
+    .quiz-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .quiz-card {
+        min-height: 100px;
+        padding: 1rem;
     }
     
     .game-container {
@@ -509,6 +597,19 @@ code {
 
 /* Very small screens */
 @media (max-width: 480px) {
+    .quiz-card {
+        min-height: 80px;
+        padding: 0.75rem;
+    }
+    
+    .quiz-card h4 {
+        font-size: 1rem;
+    }
+    
+    .quiz-card p {
+        font-size: 0.8rem;
+    }
+    
     .game-container {
         flex-direction: column;
         gap: 0.5rem;

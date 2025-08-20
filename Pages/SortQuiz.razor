@@ -1,7 +1,10 @@
 @page "/sort-quiz"
 @using pub_quiz.Models
 @using System.Text.Json
+@using System.IO
+@using System.Text.RegularExpressions
 @inject IJSRuntime JSRuntime
+@inject HttpClient Http
 
 <PageTitle>Sort Quiz | Pub-Quiz App</PageTitle>
 
@@ -12,14 +15,43 @@
             <h2>📋 Sort Quiz</h2>
             <p class="lead">Sort items in the correct order. Who's the first to guess wrong?</p>
             
-            <div class="how-to-play">
-                <h3>How to Play</h3>
+            <!-- Community Quiz Section -->
+            <div class="community-quiz-section">
+                <h3>Play a Community Quiz 🎮</h3>
+                <p>Choose from our collection of community-created sort quizzes:</p>
+                
+                <div class="quiz-grid">
+                    @for (int i = 0; i < _displayedQuizzes.Count; i += 3)
+                    {
+                        <div class="quiz-row">
+                            @for (int j = 0; j < 3 && (i + j) < _displayedQuizzes.Count; j++)
+                            {
+                                var quiz = _displayedQuizzes[i + j];
+                                <div class="quiz-card" @onclick="() => LoadQuiz(quiz)">
+                                    <h4>@quiz.Title</h4>
+                                    <p>@quiz.Hint</p>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+                
+                <div class="quiz-navigation">
+                    <button class="btn btn-outline-primary" @onclick="ShowMoreQuizzes">
+                        🎲 Show More Quizzes
+                    </button>
+                </div>
+            </div>
+            
+            <div class="create-your-own-section">
+                <h3>Create Your Own Sort Quiz 🛠️</h3>
                 <div class="instructions">
                     <div class="instruction-step">
                         <span class="step-number">1</span>
                         <div class="step-content">
                             <h4>Download the template</h4>
                             <p>Get the JSON template file to create your own quiz</p>
+                            <button class="btn btn-primary" @onclick="DownloadTemplate">Download Template</button>
                         </div>
                     </div>
                     <div class="instruction-step">
@@ -27,7 +59,6 @@
                         <div class="step-content">
                             <h4>Create your quiz</h4>
                             <p>Edit the JSON file with your items. List them in the correct order from your upper label to lower label.</p>
-                            <p><strong>💡 Tip:</strong> You can also find ready-made quizzes in our <a href="https://github.com/selmaohneh/pub-quiz.app/tree/master/quizzes" target="_blank">GitHub quizzes folder</a>!</p>
                         </div>
                     </div>
                     <div class="instruction-step">
@@ -35,23 +66,17 @@
                         <div class="step-content">
                             <h4>Upload and play</h4>
                             <p>One random item will be pre-placed. Drag or click items to sort them correctly!</p>
+                            <button class="btn btn-success" @onclick="TriggerFileUpload">Upload and Play</button>
+                            <InputFile @ref="fileInput" OnChange="HandleFileUpload" accept=".json" style="display: none;" />
                         </div>
                     </div>
                     <div class="instruction-step">
                         <span class="step-number">4</span>
                         <div class="step-content">
-                            <h4>Win the game</h4>
-                            <p>Place all items in the correct order. The first player to guess wrong loses!</p>
+                            <h4>Share with the community</h4>
+                            <p>Add your quiz to our <a href="https://github.com/selmaohneh/pub-quiz.app/tree/master/quizzes/sort-quiz" target="_blank">GitHub repository</a> so others can enjoy it too!</p>
                         </div>
                     </div>
-                </div>
-            </div>
-            
-            <div class="upload-section">
-                <div class="button-group">
-                    <button class="btn btn-primary" @onclick="DownloadTemplate">Download Template</button>
-                    <button class="btn btn-success" @onclick="TriggerFileUpload">Upload and Play</button>
-                    <InputFile @ref="fileInput" OnChange="HandleFileUpload" accept=".json" style="display: none;" />
                 </div>
             </div>
             
@@ -150,10 +175,159 @@
     private string? _draggedItem;
     private string? _incorrectlyPlacedItem;
     private InputFile? fileInput;
+    private List<SortQuizData> _allQuizzes = new();
+    private List<SortQuizData> _displayedQuizzes = new();
+    private Random _random = new();
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        await LoadAllQuizzes();
+        ShowRandomQuizzes();
+    }
+
+    private async Task LoadAllQuizzes()
+    {
+        try
+        {
+            // Get the list of JSON files from the quizzes directory
+            var quizFilesResponse = await Http.GetAsync("quizzes/sort-quiz/");
+            if (!quizFilesResponse.IsSuccessStatusCode)
+            {
+                // If we can't get the directory listing, fall back to a known list
+                await LoadQuizzesFromKnownList();
+                return;
+            }
+
+            var htmlContent = await quizFilesResponse.Content.ReadAsStringAsync();
+            
+            // Parse the HTML directory listing to extract JSON filenames
+            var quizFiles = ExtractJsonFilesFromHtml(htmlContent);
+            
+            if (quizFiles.Count == 0)
+            {
+                // Fallback to known list if no files found
+                await LoadQuizzesFromKnownList();
+                return;
+            }
+
+            _allQuizzes.Clear();
+            foreach (var quizFile in quizFiles)
+            {
+                try
+                {
+                    var json = await Http.GetStringAsync($"quizzes/sort-quiz/{quizFile}");
+                    var quiz = JsonSerializer.Deserialize<SortQuizData>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    if (quiz != null)
+                    {
+                        _allQuizzes.Add(quiz);
+                    }
+                }
+                catch
+                {
+                    // Skip quizzes that can't be loaded
+                }
+            }
+        }
+        catch
+        {
+            // Handle error silently and fall back to known list
+            await LoadQuizzesFromKnownList();
+        }
+    }
+
+    private List<string> ExtractJsonFilesFromHtml(string htmlContent)
+    {
+        var quizFiles = new List<string>();
+        
+        // Simple regex to extract JSON filenames from HTML directory listing
+        var pattern = @"href=""([^""]*\.json)""";
+        var matches = System.Text.RegularExpressions.Regex.Matches(htmlContent, pattern);
+        
+        foreach (System.Text.RegularExpressions.Match match in matches)
+        {
+            if (match.Groups.Count > 1)
+            {
+                var filename = match.Groups[1].Value;
+                if (filename.EndsWith(".json"))
+                {
+                    quizFiles.Add(filename);
+                }
+            }
+        }
+        
+        return quizFiles;
+    }
+
+    private async Task LoadQuizzesFromKnownList()
+    {
+        // Fallback method with known quiz files
+        var quizFiles = new[]
+        {
+            "age-at-death-of-famous-musicians.json",
+            "animal-maximum-lifespans.json",
+            "beer-brands-by-global-sales.json",
+            "best-selling-albums-by-millions-sold.json",
+            "chemical-elements-by-atomic-number.json",
+            "coastline-length.json",
+            "countries-by-active-military-personnel.json",
+            "german-bundesliga-2024-25-final-table.json",
+            "major-gaming-consoles-by-release-year.json",
+            "meat-consumption-per-country-2020.json",
+            "michelin-3-star-restaurants-by-country.json",
+            "most-visited-cities-by-international-visitors-2024.json",
+            "time-person-of-the-year-by-year.json",
+            "top-films-by-imdb-score-2025.json",
+            "us-presidents-newest-to-oldest.json",
+            "world-religions-by-population.json"
+        };
+
+        _allQuizzes.Clear();
+        foreach (var quizFile in quizFiles)
+        {
+            try
+            {
+                var json = await Http.GetStringAsync($"quizzes/sort-quiz/{quizFile}");
+                var quiz = JsonSerializer.Deserialize<SortQuizData>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (quiz != null)
+                {
+                    _allQuizzes.Add(quiz);
+                }
+            }
+            catch
+            {
+                // Skip quizzes that can't be loaded
+            }
+        }
+    }
+
+    private void ShowRandomQuizzes()
+    {
+        var shuffled = _allQuizzes.OrderBy(x => _random.Next()).ToList();
+        _displayedQuizzes = shuffled.Take(3).ToList();
+    }
+
+    private void ShowMoreQuizzes()
+    {
+        var currentQuizzes = _displayedQuizzes.ToList();
+        var remainingQuizzes = _allQuizzes.Except(currentQuizzes).ToList();
+        
+        if (remainingQuizzes.Count == 0)
+        {
+            // If no more quizzes, start over
+            ShowRandomQuizzes();
+            return;
+        }
+        
+        var newQuizzes = remainingQuizzes.OrderBy(x => _random.Next()).Take(3).ToList();
+        _displayedQuizzes = newQuizzes;
+    }
+
+    private async Task LoadQuiz(SortQuizData quiz)
+    {
+        _quizData = quiz;
+        InitializeGame();
+        await TrackSortQuizStarted();
     }
 
     private async Task HandleFileUpload(InputFileChangeEventArgs e)
@@ -492,6 +666,8 @@
         }
     }
 
+
+
     private void ResetGame()
     {
         _quizData = null;
@@ -500,5 +676,6 @@
         _selectedItem = null;
         _draggedItem = null;
         _incorrectlyPlacedItem = null;
+        ShowRandomQuizzes();
     }
 }

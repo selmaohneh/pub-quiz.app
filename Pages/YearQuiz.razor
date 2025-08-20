@@ -2,6 +2,7 @@
 @using pub_quiz.Models
 @using System.Text.Json
 @inject IJSRuntime JSRuntime
+@inject HttpClient Http
 @implements IAsyncDisposable
 
 <PageTitle>Year Quiz | Pub-Quiz App</PageTitle>
@@ -52,6 +53,7 @@
                 <div class="button-group">
                     <button class="btn btn-primary" @onclick="DownloadTemplate">Download Template</button>
                     <button class="btn btn-success" @onclick="TriggerFileUpload">Upload and Play</button>
+                    <button class="btn btn-info" @onclick="LoadRandomQuiz" disabled="@_isLoadingRandom">@(_isLoadingRandom ? "Loading..." : "🎲 Random Quiz")</button>
                     <InputFile @ref="fileInput" OnChange="HandleFileUpload" accept=".json" style="display: none;" />
                 </div>
             </div>
@@ -292,6 +294,7 @@
     private InputFile? fileInput;
     private Timer? _gameTimer;
     private int _yearGuessInput;
+    private bool _isLoadingRandom = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -621,6 +624,27 @@
         {
             // Analytics tracking failed, continue silently
         }
+    }
+
+    private Task LoadRandomQuiz()
+    {
+        _isLoadingRandom = true;
+        _errorMessage = string.Empty;
+        try
+        {
+            // Currently no year quiz files available
+            _errorMessage = "No ready-made year quizzes available yet. Please upload your own quiz file or check back later!";
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error loading random quiz: {ex.Message}";
+        }
+        finally
+        {
+            _isLoadingRandom = false;
+        }
+        
+        return Task.CompletedTask;
     }
 
     private void ResetGame()
