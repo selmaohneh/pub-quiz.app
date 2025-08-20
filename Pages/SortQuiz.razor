@@ -15,6 +15,48 @@
             <h2>📋 Sort Quiz</h2>
             <p class="lead">Sort items in the correct order. Who's the first to guess wrong?</p>
             
+            <!-- How to Play Section -->
+            <div class="how-to-play-section">
+                <h3>🎯 How to Play</h3>
+                <div class="rules-container">
+                    <div class="rule-item">
+                        <span class="rule-icon">🎲</span>
+                        <div class="rule-content">
+                            <h4>Game Setup</h4>
+                            <p>A topic with an expected order is given (e.g., "Countries by Population" from Most to Least). One item is pre-placed to get you started.</p>
+                        </div>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-icon">👥</span>
+                        <div class="rule-content">
+                            <h4>Team Turns</h4>
+                            <p>Teams take turns placing one item at a time in what they think is the correct position in the order.</p>
+                        </div>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-icon">✅</span>
+                        <div class="rule-content">
+                            <h4>Correct Placement</h4>
+                            <p>If the item is placed correctly, the next team gets a turn.</p>
+                        </div>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-icon">❌</span>
+                        <div class="rule-content">
+                            <h4>Wrong Placement</h4>
+                            <p>The first team to place an item incorrectly loses! All other teams get 1 point.</p>
+                        </div>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-icon">🏆</span>
+                        <div class="rule-content">
+                            <h4>Winning</h4>
+                            <p>Complete the entire order correctly to win!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Community Quiz Section -->
             <div class="community-quiz-section">
                 <h3>Play a Community Quiz 🎮</h3>
@@ -166,6 +208,268 @@
         }
     }
 </div>
+
+<style>
+    .home-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .lead {
+        font-size: 1.2rem;
+        color: #666;
+        margin-bottom: 3rem;
+    }
+    
+    .steps {
+        display: grid;
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+    
+    .step {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border-left: 4px solid #007bff;
+    }
+    
+    .step h3 {
+        margin-top: 0;
+        color: #007bff;
+    }
+    
+    .step pre {
+        background: #e9ecef;
+        padding: 1rem;
+        border-radius: 4px;
+        overflow-x: auto;
+    }
+    
+    .action-sections {
+        display: grid;
+        gap: 3rem;
+        margin-top: 3rem;
+    }
+    
+    .action-card {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease;
+    }
+    
+    .action-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    
+    .action-card h2 {
+        color: #333;
+        margin-top: 0;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+    }
+    
+    .action-card p {
+        color: #666;
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+    }
+    
+    .game-list {
+        display: grid;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+    
+    .game-card {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: all 0.2s ease;
+    }
+    
+    .game-card:hover {
+        background: #fff;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .game-card h3 {
+        margin-top: 0;
+        color: #333;
+        font-size: 1.2rem;
+    }
+    
+    .game-card p {
+        color: #666;
+        margin-bottom: 1rem;
+    }
+    
+    .quiz-night-preview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+    
+    .preview-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 3px solid #28a745;
+    }
+    
+    .preview-item .icon {
+        font-size: 1.5rem;
+    }
+    
+    .preview-item span:last-child {
+        color: #495057;
+        font-weight: 500;
+    }
+    
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        text-decoration: none;
+        border-radius: 6px;
+        display: inline-block;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-success:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    /* How to Play Section Styles */
+    .how-to-play-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    
+    .how-to-play-section h3 {
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+        text-align: center;
+    }
+    
+    .rules-container {
+        display: grid;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .rule-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1.5rem;
+        border-radius: 8px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .rule-icon {
+        font-size: 2rem;
+        flex-shrink: 0;
+        margin-top: 0.25rem;
+    }
+    
+    .rule-content h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.2rem;
+        color: white;
+    }
+    
+    .rule-content p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.5;
+    }
+    
+    .hosting-link {
+        text-align: center;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1.5rem;
+        border-radius: 8px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .hosting-link p {
+        margin: 0 0 1rem 0;
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .hosting-link .btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .hosting-link .btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+    
+    @@media (max-width: 768px) {
+        .action-sections {
+            gap: 2rem;
+        }
+        
+        .action-card {
+            padding: 1.5rem;
+        }
+        
+        .quiz-night-preview {
+            grid-template-columns: 1fr;
+        }
+        
+        .game-list {
+            grid-template-columns: 1fr;
+        }
+        
+        .how-to-play-section {
+            padding: 1.5rem;
+        }
+        
+        .rule-item {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .rule-icon {
+            margin-top: 0;
+        }
+    }
+</style>
 
 @code {
     private SortQuizData? _quizData;
