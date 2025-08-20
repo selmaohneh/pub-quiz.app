@@ -133,6 +133,10 @@
         @if (!_gameState.GameEnded && !_gameState.GameStopped)
         {
             <div class="year-game-container">
+                <div class="quiz-title-display">
+                    <h3>@_quizData?.Title</h3>
+                </div>
+                
                 <div class="range-display @(_gameState.RangeJustUpdated ? "range-updated" : "")">
                     <h3>±@_gameState.CurrentRange</h3>
                 </div>
@@ -157,6 +161,10 @@
         else if (_gameState.GameStopped && !_gameState.GameEnded)
         {
             <div class="guess-container">
+                <div class="quiz-title-display">
+                    <h3>@_quizData?.Title</h3>
+                </div>
+                
                 <div class="range-display">
                     <h3>Your range: ±@_gameState.CurrentRange</h3>
                 </div>
@@ -191,6 +199,9 @@
                 </div>
                 
                 <div class="result-details">
+                    <div class="quiz-title-display">
+                        <h3>@_quizData?.Title</h3>
+                    </div>
                     <div class="event-info">
                         <h4>@_gameState.CurrentItem?.Title</h4>
                         <p class="correct-year">Correct Year: <strong>@_gameState.CurrentItem?.Year</strong></p>
@@ -233,6 +244,15 @@
         color: #007bff;
         margin: 0;
         font-weight: bold;
+    }
+
+    .quiz-title-display h3 {
+        font-size: 2rem;
+        color: #6c757d;
+        text-align: center;
+        margin: 0;
+        font-weight: 400;
+        font-style: italic;
     }
 
     .event-title h1 {

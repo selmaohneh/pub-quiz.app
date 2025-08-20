@@ -117,5 +117,5 @@ public class LieGameState
     public int TotalLies { get; set; }
     public bool AllLiesFound { get; set; }
     public string Question { get; set; } = string.Empty;
-    public int SecondsUntilNextItem { get; set; } = 5;
+    public int SecondsUntilNextItem { get; set; } = 10;
 }

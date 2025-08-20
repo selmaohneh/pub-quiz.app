@@ -23,7 +23,7 @@
                         <span class="rule-icon">🎲</span>
                         <div class="rule-content">
                             <h4>Game Setup</h4>
-                            <p>A question or topic is shown, and statements appear one by one every 5 seconds. Some are true, some are lies. Who spots the lie first?</p>
+                            <p>A question or topic is shown, and statements appear one by one every 10 seconds. Some are true, some are lies. Who spots the lie first?</p>
                         </div>
                     </div>
                     <div class="rule-item">
@@ -107,7 +107,7 @@
                         <span class="step-number">3</span>
                         <div class="step-content">
                             <h4>Upload and play</h4>
-                            <p>Items appear every 5 seconds. Press Space, Enter, or click "That's a Lie!" when you spot a false statement!</p>
+                            <p>Items appear every 10 seconds. Press Space, Enter, or click "That's a Lie!" when you spot a false statement!</p>
                             <button class="btn btn-success" @onclick="TriggerFileUpload">Upload and Play</button>
                             <InputFile @ref="fileInput" OnChange="HandleFileUpload" accept=".json" style="display: none;" />
                         </div>
@@ -628,7 +628,7 @@
             Question = _quizData.Question,
             TotalLies = _quizData.Items.Count(x => x.IsLie),
             ItemStartTime = DateTime.Now,
-            SecondsUntilNextItem = 5
+            SecondsUntilNextItem = 10
         };
 
         StartGameTimer();
@@ -673,7 +673,7 @@
     private void StartGameTimer()
     {
         _gameTimer?.Dispose();
-        _gameState.SecondsUntilNextItem = 5;
+        _gameState.SecondsUntilNextItem = 10;
         _gameTimer = new Timer(UpdateGameProgress, null, 0, 250); // Update every 250ms for countdown
     }
 
@@ -686,15 +686,15 @@
         var totalSeconds = timeSinceItemStart.TotalSeconds;
 
         // Calculate seconds until next item
-        _gameState.SecondsUntilNextItem = Math.Max(0, 5 - (int)Math.Floor(totalSeconds));
+        _gameState.SecondsUntilNextItem = Math.Max(0, 10 - (int)Math.Floor(totalSeconds));
 
         // Check if we need to show the next item
-        if (totalSeconds >= 5)
+        if (totalSeconds >= 10)
         {
             // Move to next item (whether it was a lie or not - no result screen for missed lies)
             SelectNextItem();
             _gameState.ItemStartTime = DateTime.Now;
-            _gameState.SecondsUntilNextItem = 5;
+            _gameState.SecondsUntilNextItem = 10;
         }
 
         await InvokeAsync(StateHasChanged);
@@ -715,7 +715,7 @@
 
         _gameState.CurrentItem = _gameState.Items[_gameState.CurrentItemIndex];
         _gameState.ItemStartTime = DateTime.Now;
-        _gameState.SecondsUntilNextItem = 5;
+        _gameState.SecondsUntilNextItem = 10;
         
         // Play sound for new item appearance
         await PlaySound("itemTransition");
