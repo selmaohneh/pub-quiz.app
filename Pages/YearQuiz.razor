@@ -185,7 +185,7 @@
         }
         else if (_gameState.GameEnded)
         {
-            <div class="game-result @(_gameState.GameWon ? "success" : "failure")">
+            <div class="game-result year-quiz-result @(_gameState.GameWon ? "success" : "failure")">
                 <div class="result-title">
                     <h3>@(_gameState.GameWon ? "Correct! 🎉" : (_gameState.PlayerGuess == 0 ? "Time's Up! ⏰" : "Wrong! 😔"))</h3>
                     @if (!_gameState.GameWon && _gameState.PlayerGuess != 0)
@@ -235,8 +235,11 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        min-height: 60vh;
+        flex: 1;
+        min-height: 0;
         gap: 2rem;
+        padding: 2rem;
+        overflow: hidden;
     }
 
     .range-display h3 {
@@ -301,9 +304,14 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: center;
+        flex: 1;
+        min-height: 0;
         gap: 2rem;
         max-width: 500px;
         margin: 0 auto;
+        padding: 2rem;
+        overflow: hidden;
     }
 
     .guess-input {
@@ -333,9 +341,21 @@
         -moz-appearance: textfield;
     }
 
+    .year-quiz-result {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        min-height: 0;
+        padding: 2rem;
+        overflow: hidden;
+    }
+    
     .result-title {
         text-align: center;
         margin-bottom: 2rem;
+        flex-shrink: 0;
     }
 
     .result-title h3 {

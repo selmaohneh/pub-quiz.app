@@ -156,7 +156,7 @@
         }
         else if (_gameState.ShowResult)
         {
-            <div class="game-result @(_gameState.WasCorrectGuess ? "success" : "failure")">
+            <div class="game-result lie-quiz-result @(_gameState.WasCorrectGuess ? "success" : "failure")">
                 <div class="result-title">
                     <h3>@(_gameState.WasCorrectGuess ? (_gameState.PlayerGuessedLie ? "Correct! It was a lie! 🎉" : "Correct! It was true! ✅") : (_gameState.PlayerGuessedLie ? "Wrong! It was actually true! 😔" : "Missed! It was a lie! 😔"))</h3>
                 </div>
@@ -175,7 +175,7 @@
         }
         else if (_gameState.GameEnded)
         {
-            <div class="game-result @(_gameState.LiesFound == _gameState.TotalLies ? "success" : "failure")">
+            <div class="game-result lie-quiz-result @(_gameState.LiesFound == _gameState.TotalLies ? "success" : "failure")">
                 <div class="final-title">
                     <h2>Game Complete! 🎮</h2>
                 </div>
@@ -207,8 +207,11 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        min-height: 60vh;
+        flex: 1;
+        min-height: 0;
         gap: 2rem;
+        padding: 2rem;
+        overflow: hidden;
     }
 
     .question-display h3 {
@@ -357,6 +360,24 @@
     .final-title h2 {
         font-size: 2.5rem;
         margin-bottom: 0.5rem;
+    }
+    
+    .lie-quiz-result {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        min-height: 0;
+        padding: 2rem;
+        overflow: hidden;
+    }
+    
+    .result-items-area {
+        flex-shrink: 0;
+        max-height: 60vh;
+        overflow-y: auto;
+        width: 100%;
     }
 
     @@media (max-width: 768px) {

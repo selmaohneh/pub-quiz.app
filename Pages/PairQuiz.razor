@@ -381,10 +381,18 @@
     }
     
     .game-result-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        flex: 1;
+        min-height: 0;
         text-align: center;
-        padding: 2rem;
+        padding: 1.5rem;
         border-radius: 12px;
-        margin-top: 2rem;
+        margin-top: 1rem;
+        overflow: hidden;
+        max-height: calc(100vh - 120px);
     }
     
     .game-result-container.success {
@@ -400,22 +408,44 @@
     }
     
     .result-pairs-area {
-        margin: 2rem 0;
+        margin: 1rem 0;
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    
+    .result-pairs-area h4 {
+        flex-shrink: 0;
+        margin-bottom: 0.5rem;
     }
     
     .result-pairs {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1rem;
-        max-width: 1000px;
-        margin: 0 auto;
+        gap: 0.75rem;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-width: 100%;
+        padding: 0.5rem;
+        align-content: start;
+        box-sizing: border-box;
     }
     
     .result-pair {
         display: flex;
         align-items: center;
         border-radius: 8px;
-        padding: 1rem;
+        padding: 0.75rem;
+        min-height: 50px;
+        height: auto;
+        font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+        box-sizing: border-box;
+        width: 100%;
     }
     
     .result-pair.correct {
@@ -701,6 +731,18 @@
             max-height: 38px;
         }
         
+        .result-pairs {
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+            padding: 0.25rem;
+        }
+        
+        .result-pair {
+            padding: 0.5rem;
+            min-height: 45px;
+            font-size: 0.85rem;
+        }
+        
         .quiz-row {
             grid-template-columns: 1fr;
         }
@@ -739,8 +781,38 @@
             font-size: clamp(0.7rem, 3vw, 0.85rem);
         }
         
+        .result-pairs {
+            grid-template-columns: 1fr;
+            gap: 0.4rem;
+            padding: 0.25rem;
+        }
+        
+        .result-pair {
+            padding: 0.4rem;
+            min-height: 40px;
+            font-size: 0.8rem;
+        }
+        
+        .connection-line {
+            width: 30px;
+            margin: 0 0.5rem;
+        }
+        
         .center-panel {
             flex: 1;
+        }
+    }
+    
+    /* Special handling for many pairs */
+    @@media (min-width: 769px) {
+        .result-pairs {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+    }
+    
+    @@media (min-width: 1200px) {
+        .result-pairs {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         }
     }
 </style>
