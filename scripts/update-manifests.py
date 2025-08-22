@@ -41,7 +41,7 @@ def update_manifest(quiz_type):
 
 def main():
     """Update manifests for all quiz types."""
-    quiz_types = ['sort-quiz', 'lie-quiz', 'year-quiz']
+    quiz_types = ['sort-quiz', 'lie-quiz', 'year-quiz', 'pair-quiz']
     
     print(f"Starting manifest update for quiz types: {quiz_types}")
     print(f"Current working directory: {Path.cwd()}")

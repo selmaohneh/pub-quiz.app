@@ -1,0 +1,1146 @@
+@page "/pair-quiz"
+@using pub_quiz.Models
+@using System.Text.Json
+@using System.IO
+@using System.Text.RegularExpressions
+@inject IJSRuntime JSRuntime
+@inject HttpClient Http
+
+<PageTitle>Pair Quiz | Pub-Quiz App</PageTitle>
+
+<div class="pair-quiz-container @(_quizData != null ? "playing" : "")">
+    @if (_quizData == null)
+    {
+        <div class="quiz-setup">
+            <h2>🔗 Pair Quiz</h2>
+            <p class="lead">Match pairs that belong together. Can you find all the correct connections?</p>
+            
+            <!-- How to Play Section -->
+            <div class="how-to-play-section">
+                <h3>🎯 How to Play</h3>
+                <div class="rules-container">
+                    <div class="rule-item">
+                        <span class="rule-icon">🎲</span>
+                        <div class="rule-content">
+                            <h4>Game Setup</h4>
+                            <p>Items that belong together are shown on the left and right sides in random order (e.g., "Countries" and "Capital Cities").</p>
+                        </div>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-icon">👆</span>
+                        <div class="rule-content">
+                            <h4>Making Connections</h4>
+                            <p>Click or drag items from either side to match them with their correct partner.</p>
+                        </div>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-icon">✅</span>
+                        <div class="rule-content">
+                            <h4>Correct Match</h4>
+                            <p>When you match correctly, the pair moves to the center and turns green!</p>
+                        </div>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-icon">❌</span>
+                        <div class="rule-content">
+                            <h4>Wrong Match</h4>
+                            <p>Make an incorrect match and the game ends. The correct pairs will be revealed.</p>
+                        </div>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-icon">🏆</span>
+                        <div class="rule-content">
+                            <h4>Winning</h4>
+                            <p>Match all pairs correctly to win the game!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Community Quiz Section -->
+            <div class="community-quiz-section">
+                <h3>Play a Community Quiz 🎮</h3>
+                <p>Choose from our collection of community-created pair quizzes:</p>
+                
+                <div class="quiz-grid">
+                    @for (int i = 0; i < _displayedQuizzes.Count; i += 3)
+                    {
+                        <div class="quiz-row">
+                            @for (int j = 0; j < 3 && (i + j) < _displayedQuizzes.Count; j++)
+                            {
+                                var quiz = _displayedQuizzes[i + j];
+                                <div class="quiz-card" @onclick="() => LoadQuiz(quiz)">
+                                    <h4>@quiz.Title</h4>
+                                    <p>@quiz.Description</p>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+                
+                <div class="quiz-navigation">
+                    <button class="btn btn-outline-primary" @onclick="ShowMoreQuizzes">
+                        🎲 Show More Quizzes
+                    </button>
+                </div>
+            </div>
+            
+            <div class="create-your-own-section">
+                <h3>Create Your Own Pair Quiz 🛠️</h3>
+                <div class="instructions">
+                    <div class="instruction-step">
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <h4>Download the template</h4>
+                            <p>Get the JSON template file to create your own quiz</p>
+                            <button class="btn btn-primary" @onclick="DownloadTemplate">Download Template</button>
+                        </div>
+                    </div>
+                    <div class="instruction-step">
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <h4>Create your quiz</h4>
+                            <p>Edit the JSON file with your pairs. Add one additional right item so players can make a mistake on the last pair.</p>
+                        </div>
+                    </div>
+                    <div class="instruction-step">
+                        <span class="step-number">3</span>
+                        <div class="step-content">
+                            <h4>Upload and play</h4>
+                            <p>Items will be shuffled randomly. Click or drag to match pairs correctly!</p>
+                            <button class="btn btn-success" @onclick="TriggerFileUpload">Upload and Play</button>
+                            <InputFile @ref="fileInput" OnChange="HandleFileUpload" accept=".json" style="display: none;" />
+                        </div>
+                    </div>
+                    <div class="instruction-step">
+                        <span class="step-number">4</span>
+                        <div class="step-content">
+                            <h4>Share with the community</h4>
+                            <p>Add your quiz to our <a href="https://github.com/selmaohneh/pub-quiz.app/tree/master/quizzes/pair-quiz" target="_blank">GitHub repository</a> so others can enjoy it too!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="alert alert-danger mt-3">@_errorMessage</div>
+            }
+        </div>
+    }
+    else
+    {
+        <h2 class="game-title">@_quizData.Title</h2>
+        
+        @if (!_gameState.GameEnded)
+        {
+            <div class="game-container">
+                <div class="left-panel">
+                    <h4>@_quizData.LeftLabel</h4>
+                    <div class="items-grid" style="--current-available-items: @_gameState.LeftItems.Count; --current-available-gaps: @(_gameState.LeftItems.Count - 1);">
+                        @foreach (var item in _gameState.LeftItems)
+                        {
+                            <div class="item-card @(item == _gameState.SelectedLeftItem ? "selected" : "") @((_gameState.SelectedRightItem != null && item != _gameState.SelectedLeftItem) ? "drop-target" : "")" 
+                                 draggable="true" 
+                                 @ondragstart="() => StartDragLeft(item)"
+                                 @ondragover="PreventDefault"
+                                 @ondragover:preventDefault="true"
+                                 @ondrop="() => DropOnLeft(item)"
+                                 @onclick="async () => await SelectLeftItem(item)">
+                                @item
+                            </div>
+                        }
+                    </div>
+                </div>
+                
+                <div class="center-panel">
+                    <div class="matched-pairs">
+                        @foreach (var pair in _gameState.MatchedPairs)
+                        {
+                            <div class="matched-pair">
+                                <div class="matched-item left">@pair.Left</div>
+                                <div class="connection-line"></div>
+                                <div class="matched-item right">@pair.Right</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                
+                <div class="right-panel">
+                    <h4>@_quizData.RightLabel</h4>
+                    <div class="items-grid" style="--current-available-items: @_gameState.RightItems.Count; --current-available-gaps: @(_gameState.RightItems.Count - 1);">
+                        @foreach (var item in _gameState.RightItems)
+                        {
+                            <div class="item-card @(item == _gameState.SelectedRightItem ? "selected" : "") @((_gameState.SelectedLeftItem != null && item != _gameState.SelectedRightItem) ? "drop-target" : "")"
+                                 draggable="true" 
+                                 @ondragstart="() => StartDragRight(item)"
+                                 @ondragover="PreventDefault"
+                                 @ondragover:preventDefault="true"
+                                 @ondrop="() => DropOnRight(item)"
+                                 @onclick="async () => await SelectRightItem(item)">
+                                @item
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="game-result-container @(_gameState.GameWon ? "success" : "failure")">
+                <h3>@(_gameState.GameWon ? "Congratulations! 🎉" : "Game Over 😔")</h3>
+                <p>@(_gameState.GameWon ? "You matched all pairs correctly!" : "You made an incorrect match.")</p>
+                
+                <div class="result-pairs-area">
+                    <h4>Correct Pairs:</h4>
+                    <div class="result-pairs">
+                        @foreach (var pair in _gameState.CorrectPairs)
+                        {
+                            var isIncorrectPair = (pair.Left == _gameState.IncorrectLeftItem && pair.Right == _gameState.IncorrectRightItem) ||
+                                                  (pair.Left == _gameState.IncorrectRightItem && pair.Right == _gameState.IncorrectLeftItem);
+                            <div class="result-pair @(isIncorrectPair ? "incorrect" : "correct")">
+                                <div class="result-item left">@pair.Left</div>
+                                <div class="connection-line"></div>
+                                <div class="result-item right">@pair.Right</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary mt-2" @onclick="ResetGame">Play Again</button>
+            </div>
+        }
+    }
+</div>
+
+<style>
+    .pair-quiz-container {
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+        position: relative;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .pair-quiz-container.playing {
+        min-height: 100vh;
+        overflow: hidden;
+    }
+    
+    .lead {
+        font-size: 1.2rem;
+        color: #666;
+        margin-bottom: 3rem;
+    }
+    
+    .game-container {
+        display: flex;
+        gap: 1rem;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+        margin-top: 1rem;
+    }
+    
+    .left-panel, .right-panel {
+        flex: 1;
+        min-width: 250px;
+        max-width: 350px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .left-panel h4, .right-panel h4 {
+        margin: 0 0 1rem 0;
+        flex-shrink: 0;
+        text-align: center;
+        color: #333;
+        font-size: 1.2rem;
+    }
+    
+    .center-panel {
+        flex: 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        overflow: hidden;
+        padding: 0 1rem;
+    }
+    
+    .matched-pairs {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+    }
+    
+    .matched-pair {
+        display: flex;
+        align-items: center;
+        background: #d4edda;
+        border: 2px solid #28a745;
+        border-radius: 8px;
+        padding: 1rem;
+        animation: slideIn 0.5s ease-out;
+    }
+    
+    .matched-item {
+        flex: 1;
+        text-align: center;
+        font-weight: 500;
+        color: #155724;
+    }
+    
+    .connection-line {
+        width: 40px;
+        height: 2px;
+        background: #28a745;
+        margin: 0 1rem;
+        position: relative;
+    }
+    
+    .connection-line::before {
+        content: '';
+        position: absolute;
+        left: -4px;
+        top: -3px;
+        width: 0;
+        height: 0;
+        border-right: 8px solid #28a745;
+        border-top: 4px solid transparent;
+        border-bottom: 4px solid transparent;
+    }
+    
+    .connection-line::after {
+        content: '';
+        position: absolute;
+        right: -4px;
+        top: -3px;
+        width: 0;
+        height: 0;
+        border-left: 8px solid #28a745;
+        border-top: 4px solid transparent;
+        border-bottom: 4px solid transparent;
+    }
+    
+    .items-grid {
+        display: flex;
+        flex-direction: column;
+        gap: var(--available-gap-size);
+        flex: 1;
+        overflow: hidden;
+        padding: var(--panel-padding) 0;
+    }
+    
+    .item-card {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 4px;
+        padding: 0.3rem;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.2s;
+        font-size: clamp(0.8rem, 2vw, 1rem);
+        height: calc((100vh - var(--ui-reserve-desktop) - (var(--current-available-gaps, var(--available-gaps)) * var(--available-gap-size))) / var(--current-available-items, var(--available-items)));
+        min-height: 25px;
+        max-height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        word-break: break-word;
+        hyphens: auto;
+        flex-shrink: 0;
+        user-select: none;
+        font-weight: 500;
+    }
+    
+    .item-card:hover {
+        background: #e9ecef;
+        transform: translateY(-1px);
+    }
+    
+    .item-card.selected {
+        background: #007bff;
+        color: white;
+        border-color: #0056b3;
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+    }
+    
+    .item-card.drop-target {
+        border-color: #28a745;
+        background: #f8fff9;
+        border-style: dashed;
+    }
+    
+    .game-result-container {
+        text-align: center;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-top: 2rem;
+    }
+    
+    .game-result-container.success {
+        background: #d4edda;
+        border: 2px solid #28a745;
+        color: #155724;
+    }
+    
+    .game-result-container.failure {
+        background: #f8d7da;
+        border: 2px solid #dc3545;
+        color: #721c24;
+    }
+    
+    .result-pairs-area {
+        margin: 2rem 0;
+    }
+    
+    .result-pairs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .result-pair {
+        display: flex;
+        align-items: center;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+    
+    .result-pair.correct {
+        background: #d4edda;
+        border: 2px solid #28a745;
+    }
+    
+    .result-pair.incorrect {
+        background: #f8d7da;
+        border: 2px solid #dc3545;
+    }
+    
+    .result-item {
+        flex: 1;
+        text-align: center;
+        font-weight: 500;
+    }
+    
+    .result-pair.correct .result-item {
+        color: #155724;
+    }
+    
+    .result-pair.incorrect .result-item {
+        color: #721c24;
+    }
+    
+    .result-pair.correct .connection-line {
+        background: #28a745;
+    }
+    
+    .result-pair.correct .connection-line::before {
+        border-right-color: #28a745;
+    }
+    
+    .result-pair.correct .connection-line::after {
+        border-left-color: #28a745;
+    }
+    
+    .result-pair.incorrect .connection-line {
+        background: #dc3545;
+    }
+    
+    .result-pair.incorrect .connection-line::before {
+        border-right-color: #dc3545;
+    }
+    
+    .result-pair.incorrect .connection-line::after {
+        border-left-color: #dc3545;
+    }
+    
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* How to Play Section Styles */
+    .how-to-play-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    
+    .how-to-play-section h3 {
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+        text-align: center;
+    }
+    
+    .rules-container {
+        display: grid;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .rule-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1.5rem;
+        border-radius: 8px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .rule-icon {
+        font-size: 2rem;
+        flex-shrink: 0;
+        margin-top: 0.25rem;
+    }
+    
+    .rule-content h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.2rem;
+        color: white;
+    }
+    
+    .rule-content p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.5;
+    }
+    
+    .community-quiz-section {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .community-quiz-section h3 {
+        margin-top: 0;
+        color: #333;
+    }
+    
+    .quiz-grid {
+        margin: 1.5rem 0;
+    }
+    
+    .quiz-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .quiz-card {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .quiz-card:hover {
+        background: #fff;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    
+    .quiz-card h4 {
+        margin-top: 0;
+        color: #333;
+        font-size: 1.1rem;
+    }
+    
+    .quiz-card p {
+        color: #666;
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+    
+    .quiz-navigation {
+        text-align: center;
+    }
+    
+    .create-your-own-section {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .create-your-own-section h3 {
+        margin-top: 0;
+        color: #333;
+    }
+    
+    .instructions {
+        display: grid;
+        gap: 1.5rem;
+    }
+    
+    .instruction-step {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #007bff;
+    }
+    
+    .step-number {
+        background: #007bff;
+        color: white;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+    
+    .step-content h4 {
+        margin: 0 0 0.5rem 0;
+        color: #333;
+    }
+    
+    .step-content p {
+        margin: 0 0 1rem 0;
+        color: #666;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #0056b3;
+        transform: translateY(-1px);
+    }
+    
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+    
+    .btn-success:hover {
+        background: #218838;
+        transform: translateY(-1px);
+    }
+    
+    .btn-outline-primary {
+        background: transparent;
+        color: #007bff;
+        border: 2px solid #007bff;
+    }
+    
+    .btn-outline-primary:hover {
+        background: #007bff;
+        color: white;
+    }
+    
+    @@media (max-width: 768px) {
+        .pair-quiz-container {
+            padding: 0.5rem;
+            position: relative;
+        }
+        
+        .game-container {
+            gap: 0.5rem;
+        }
+        
+        .left-panel, .right-panel {
+            min-width: 200px;
+            max-width: 250px;
+        }
+        
+        .item-card {
+            font-size: clamp(0.75rem, 2.5vw, 0.9rem);
+            padding: 0.25rem;
+            height: calc((100vh - var(--ui-reserve-tablet) - (var(--current-available-gaps, var(--available-gaps)) * var(--available-gap-size))) / var(--current-available-items, var(--available-items)));
+            min-height: 22px;
+            max-height: 38px;
+        }
+        
+        .quiz-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .instruction-step {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .rule-item {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .rule-icon {
+            margin-top: 0;
+        }
+    }
+    
+    @@media (max-width: 480px) {
+        .game-container {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .left-panel, .right-panel {
+            max-width: none;
+            flex: 0 0 auto;
+            max-height: 40vh;
+        }
+        
+        .item-card {
+            height: calc((100vh - var(--ui-reserve-mobile) - (var(--current-available-gaps, var(--available-gaps)) * var(--available-gap-size))) / var(--current-available-items, var(--available-items)));
+            min-height: 18px;
+            max-height: 32px;
+            font-size: clamp(0.7rem, 3vw, 0.85rem);
+        }
+        
+        .center-panel {
+            flex: 1;
+        }
+    }
+</style>
+
+@code {
+    private PairQuizData? _quizData;
+    private PairGameState _gameState = new();
+    private string _errorMessage = string.Empty;
+    private string? _draggedLeftItem;
+    private string? _draggedRightItem;
+    private InputFile? fileInput;
+    private List<PairQuizData> _allQuizzes = new();
+    private List<PairQuizData> _displayedQuizzes = new();
+    private Random _random = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await LoadAllQuizzes();
+        ShowRandomQuizzes();
+    }
+
+    private async Task LoadAllQuizzes()
+    {
+        try
+        {
+            var manifestResponse = await Http.GetAsync("quizzes/pair-quiz/manifest.json");
+            if (!manifestResponse.IsSuccessStatusCode)
+            {
+                _allQuizzes.Clear();
+                return;
+            }
+
+            var manifestContent = await manifestResponse.Content.ReadAsStringAsync();
+            var quizFiles = JsonSerializer.Deserialize<List<string>>(manifestContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            
+            if (quizFiles == null || quizFiles.Count == 0)
+            {
+                _allQuizzes.Clear();
+                return;
+            }
+
+            _allQuizzes.Clear();
+            foreach (var quizFile in quizFiles)
+            {
+                try
+                {
+                    var json = await Http.GetStringAsync($"quizzes/pair-quiz/{quizFile}");
+                    var quiz = JsonSerializer.Deserialize<PairQuizData>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    if (quiz != null)
+                    {
+                        _allQuizzes.Add(quiz);
+                    }
+                }
+                catch
+                {
+                    // Skip quizzes that can't be loaded
+                }
+            }
+        }
+        catch
+        {
+            _allQuizzes.Clear();
+        }
+    }
+
+    private void ShowRandomQuizzes()
+    {
+        var shuffled = _allQuizzes.OrderBy(x => _random.Next()).ToList();
+        _displayedQuizzes = shuffled.Take(3).ToList();
+    }
+
+    private void ShowMoreQuizzes()
+    {
+        var currentQuizzes = _displayedQuizzes.ToList();
+        var remainingQuizzes = _allQuizzes.Except(currentQuizzes).ToList();
+        
+        if (remainingQuizzes.Count == 0)
+        {
+            ShowRandomQuizzes();
+            return;
+        }
+        
+        var newQuizzes = remainingQuizzes.OrderBy(x => _random.Next()).Take(3).ToList();
+        _displayedQuizzes = newQuizzes;
+    }
+
+    private async Task LoadQuiz(PairQuizData quiz)
+    {
+        _quizData = quiz;
+        InitializeGame();
+        await TrackPairQuizStarted();
+    }
+
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        _errorMessage = string.Empty;
+        
+        try
+        {
+            var file = e.File;
+            if (file.Size > 1024 * 1024)
+            {
+                _errorMessage = "File size must be less than 1MB.";
+                return;
+            }
+
+            using var stream = file.OpenReadStream();
+            using var reader = new StreamReader(stream);
+            var content = await reader.ReadToEndAsync();
+            
+            _quizData = JsonSerializer.Deserialize<PairQuizData>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (_quizData == null)
+            {
+                _errorMessage = "Invalid JSON format.";
+                return;
+            }
+
+            if (_quizData.Pairs.Count < 2)
+            {
+                _errorMessage = "Quiz must have at least 2 pairs.";
+                return;
+            }
+
+            InitializeGame();
+            await TrackPairQuizStarted();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error loading file: {ex.Message}";
+        }
+    }
+
+    private void InitializeGame()
+    {
+        if (_quizData == null) return;
+
+        var random = new Random();
+        List<PairQuizPair> pairsToUse;
+        
+        // If more than 20 pairs, randomly select 20 while maintaining correct pairs
+        if (_quizData.Pairs.Count > 20)
+        {
+            var allIndices = Enumerable.Range(0, _quizData.Pairs.Count).ToList();
+            var selectedIndices = allIndices.OrderBy(x => random.Next()).Take(20).ToList();
+            pairsToUse = selectedIndices.Select(i => _quizData.Pairs[i]).ToList();
+        }
+        else
+        {
+            pairsToUse = _quizData.Pairs.ToList();
+        }
+        
+        // Create lists of left and right items from selected pairs
+        var leftItems = pairsToUse.Select(p => p.Left).ToList();
+        var rightItems = pairsToUse.Select(p => p.Right).ToList();
+        
+        // Add additional right item
+        if (!string.IsNullOrEmpty(_quizData.AdditionalRightItem))
+        {
+            rightItems.Add(_quizData.AdditionalRightItem);
+        }
+        
+        // Shuffle both lists
+        for (int i = leftItems.Count - 1; i > 0; i--)
+        {
+            int j = random.Next(i + 1);
+            (leftItems[i], leftItems[j]) = (leftItems[j], leftItems[i]);
+        }
+        
+        for (int i = rightItems.Count - 1; i > 0; i--)
+        {
+            int j = random.Next(i + 1);
+            (rightItems[i], rightItems[j]) = (rightItems[j], rightItems[i]);
+        }
+
+        _gameState = new PairGameState
+        {
+            LeftItems = leftItems,
+            RightItems = rightItems,
+            CorrectPairs = pairsToUse,
+            MatchedPairs = new List<PairQuizPair>()
+        };
+    }
+
+    private async Task SelectLeftItem(string item)
+    {
+        if (_gameState.SelectedLeftItem == item)
+        {
+            _gameState.SelectedLeftItem = null;
+        }
+        else
+        {
+            // Check if we have a right item selected for matching
+            if (_gameState.SelectedRightItem != null)
+            {
+                await TryMatch(item, _gameState.SelectedRightItem);
+            }
+            else
+            {
+                _gameState.SelectedLeftItem = item;
+                _gameState.SelectedRightItem = null;
+            }
+        }
+    }
+
+    private async Task SelectRightItem(string item)
+    {
+        if (_gameState.SelectedRightItem == item)
+        {
+            _gameState.SelectedRightItem = null;
+        }
+        else
+        {
+            _gameState.SelectedRightItem = item;
+            
+            // Check if we have a left item selected for matching
+            if (_gameState.SelectedLeftItem != null)
+            {
+                await TryMatch(_gameState.SelectedLeftItem, item);
+            }
+        }
+    }
+
+    private void StartDragLeft(string item)
+    {
+        _draggedLeftItem = item;
+        _gameState.SelectedLeftItem = null;
+        _gameState.SelectedRightItem = null;
+    }
+
+    private void StartDragRight(string item)
+    {
+        _draggedRightItem = item;
+        _gameState.SelectedLeftItem = null;
+        _gameState.SelectedRightItem = null;
+    }
+
+    private void PreventDefault(DragEventArgs e)
+    {
+        // Allow drops
+    }
+
+    private async Task DropOnRight(string rightItem)
+    {
+        if (_draggedLeftItem != null)
+        {
+            await TryMatch(_draggedLeftItem, rightItem);
+            _draggedLeftItem = null;
+        }
+        else if (_draggedRightItem != null && _draggedRightItem != rightItem)
+        {
+            // Handle right-to-right drag if needed
+            _draggedRightItem = null;
+        }
+    }
+
+    private async Task DropOnLeft(string leftItem)
+    {
+        if (_draggedRightItem != null)
+        {
+            await TryMatch(leftItem, _draggedRightItem);
+            _draggedRightItem = null;
+        }
+        else if (_draggedLeftItem != null && _draggedLeftItem != leftItem)
+        {
+            // Handle left-to-left drag if needed
+            _draggedLeftItem = null;
+        }
+    }
+
+    private async Task TryMatch(string leftItem, string rightItem)
+    {
+        if (_gameState.GameEnded) return;
+
+        // Check if this is a correct match
+        var isCorrectMatch = _gameState.CorrectPairs.Any(p => 
+            (p.Left == leftItem && p.Right == rightItem) || 
+            (p.Left == rightItem && p.Right == leftItem));
+
+        if (isCorrectMatch)
+        {
+            // Correct match
+            await PlaySound("correct");
+            
+            // Find the correct pair
+            var correctPair = _gameState.CorrectPairs.First(p => 
+                (p.Left == leftItem && p.Right == rightItem) || 
+                (p.Left == rightItem && p.Right == leftItem));
+            
+            // Add to matched pairs (ensure left-right order)
+            var matchedPair = new PairQuizPair 
+            { 
+                Left = correctPair.Left, 
+                Right = correctPair.Right 
+            };
+            _gameState.MatchedPairs.Add(matchedPair);
+            
+            // Remove items from available lists
+            _gameState.LeftItems.Remove(correctPair.Left);
+            _gameState.RightItems.Remove(correctPair.Right);
+            
+            // Clear selections
+            _gameState.SelectedLeftItem = null;
+            _gameState.SelectedRightItem = null;
+            
+            // Check if game is won
+            if (_gameState.MatchedPairs.Count == _gameState.CorrectPairs.Count)
+            {
+                _gameState.GameEnded = true;
+                _gameState.GameWon = true;
+            }
+        }
+        else
+        {
+            // Incorrect match
+            await PlaySound("incorrect");
+            _gameState.IncorrectLeftItem = leftItem;
+            _gameState.IncorrectRightItem = rightItem;
+            _gameState.GameEnded = true;
+            _gameState.GameWon = false;
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task PlaySound(string soundType)
+    {
+        try
+        {
+            if (soundType == "correct")
+            {
+                await JSRuntime.InvokeVoidAsync("playCorrectSound");
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("playIncorrectSound");
+            }
+        }
+        catch
+        {
+            // Sound playback failed, continue silently
+        }
+    }
+
+    private async Task DownloadTemplate()
+    {
+        var template = new PairQuizData
+        {
+            Title = "Countries and Capitals",
+            LeftLabel = "Countries",
+            RightLabel = "Capital Cities",
+            Description = "Match each country with its capital city. One extra capital is included to make the last match challenging!",
+            Pairs = new List<PairQuizPair>
+            {
+                new() { Left = "France", Right = "Paris" },
+                new() { Left = "Germany", Right = "Berlin" },
+                new() { Left = "Italy", Right = "Rome" },
+                new() { Left = "Spain", Right = "Madrid" }
+            },
+            AdditionalRightItem = "Vienna"
+        };
+
+        var json = JsonSerializer.Serialize(template, new JsonSerializerOptions { WriteIndented = true });
+        var bytes = System.Text.Encoding.UTF8.GetBytes(json);
+        var base64 = Convert.ToBase64String(bytes);
+        
+        await JSRuntime.InvokeVoidAsync("downloadFile", "pair-quiz-template.json", base64);
+    }
+
+    private async Task TriggerFileUpload()
+    {
+        if (fileInput != null)
+        {
+            await JSRuntime.InvokeVoidAsync("triggerFileInput", fileInput.Element);
+        }
+    }
+
+    private async Task TrackPairQuizStarted()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("trackPlausibleEvent", "pair-quiz-started", new { });
+        }
+        catch
+        {
+            // Analytics tracking failed, continue silently
+        }
+    }
+
+    private void ResetGame()
+    {
+        _quizData = null;
+        _gameState = new PairGameState();
+        _errorMessage = string.Empty;
+        _draggedLeftItem = null;
+        _draggedRightItem = null;
+        ShowRandomQuizzes();
+    }
+} 

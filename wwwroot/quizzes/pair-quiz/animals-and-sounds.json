@@ -1,0 +1,49 @@
+{
+  "title": "Animals and Their Sounds",
+  "leftLabel": "Animals",
+  "rightLabel": "Sounds",
+  "description": "Match each animal with the sound they make. One extra sound is included to make the last match challenging!",
+  "pairs": [
+    {
+      "left": "Dog",
+      "right": "Bark"
+    },
+    {
+      "left": "Cat",
+      "right": "Meow"
+    },
+    {
+      "left": "Cow",
+      "right": "Moo"
+    },
+    {
+      "left": "Pig",
+      "right": "Oink"
+    },
+    {
+      "left": "Horse",
+      "right": "Neigh"
+    },
+    {
+      "left": "Sheep",
+      "right": "Baa"
+    },
+    {
+      "left": "Duck",
+      "right": "Quack"
+    },
+    {
+      "left": "Rooster",
+      "right": "Cock-a-doodle-doo"
+    },
+    {
+      "left": "Lion",
+      "right": "Roar"
+    },
+    {
+      "left": "Bee",
+      "right": "Buzz"
+    }
+  ],
+  "additionalRightItem": "Hiss"
+} 

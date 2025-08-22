@@ -1,0 +1,209 @@
+{
+  "title": "Countries and Capitals",
+  "leftLabel": "Countries",
+  "rightLabel": "Capital Cities",
+  "description": "Match each country with its capital city. One extra capital is included to make the last match challenging!",
+  "pairs": [
+    {
+      "left": "France",
+      "right": "Paris"
+    },
+    {
+      "left": "Germany",
+      "right": "Berlin"
+    },
+    {
+      "left": "Italy",
+      "right": "Rome"
+    },
+    {
+      "left": "Spain",
+      "right": "Madrid"
+    },
+    {
+      "left": "United Kingdom",
+      "right": "London"
+    },
+    {
+      "left": "Netherlands",
+      "right": "Amsterdam"
+    },
+    {
+      "left": "Portugal",
+      "right": "Lisbon"
+    },
+    {
+      "left": "Greece",
+      "right": "Athens"
+    },
+    {
+      "left": "Austria",
+      "right": "Vienna"
+    },
+    {
+      "left": "Belgium",
+      "right": "Brussels"
+    },
+    {
+      "left": "Denmark",
+      "right": "Copenhagen"
+    },
+    {
+      "left": "Sweden",
+      "right": "Stockholm"
+    },
+    {
+      "left": "Norway",
+      "right": "Oslo"
+    },
+    {
+      "left": "Finland",
+      "right": "Helsinki"
+    },
+    {
+      "left": "Poland",
+      "right": "Warsaw"
+    },
+    {
+      "left": "Czech Republic",
+      "right": "Prague"
+    },
+    {
+      "left": "Hungary",
+      "right": "Budapest"
+    },
+    {
+      "left": "Switzerland",
+      "right": "Bern"
+    },
+    {
+      "left": "Ireland",
+      "right": "Dublin"
+    },
+    {
+      "left": "Iceland",
+      "right": "Reykjavik"
+    },
+    {
+      "left": "Croatia",
+      "right": "Zagreb"
+    },
+    {
+      "left": "Slovenia",
+      "right": "Ljubljana"
+    },
+    {
+      "left": "Slovakia",
+      "right": "Bratislava"
+    },
+    {
+      "left": "Romania",
+      "right": "Bucharest"
+    },
+    {
+      "left": "Bulgaria",
+      "right": "Sofia"
+    },
+    {
+      "left": "Serbia",
+      "right": "Belgrade"
+    },
+    {
+      "left": "Estonia",
+      "right": "Tallinn"
+    },
+    {
+      "left": "Latvia",
+      "right": "Riga"
+    },
+    {
+      "left": "Lithuania",
+      "right": "Vilnius"
+    },
+    {
+      "left": "Luxembourg",
+      "right": "Luxembourg City"
+    },
+    {
+      "left": "Malta",
+      "right": "Valletta"
+    },
+    {
+      "left": "Cyprus",
+      "right": "Nicosia"
+    },
+    {
+      "left": "Russia",
+      "right": "Moscow"
+    },
+    {
+      "left": "Ukraine",
+      "right": "Kyiv"
+    },
+    {
+      "left": "Belarus",
+      "right": "Minsk"
+    },
+    {
+      "left": "Turkey",
+      "right": "Ankara"
+    },
+    {
+      "left": "Canada",
+      "right": "Ottawa"
+    },
+    {
+      "left": "United States",
+      "right": "Washington D.C."
+    },
+    {
+      "left": "Mexico",
+      "right": "Mexico City"
+    },
+    {
+      "left": "Brazil",
+      "right": "Brasília"
+    },
+    {
+      "left": "Argentina",
+      "right": "Buenos Aires"
+    },
+    {
+      "left": "Chile",
+      "right": "Santiago"
+    },
+    {
+      "left": "Australia",
+      "right": "Canberra"
+    },
+    {
+      "left": "New Zealand",
+      "right": "Wellington"
+    },
+    {
+      "left": "Japan",
+      "right": "Tokyo"
+    },
+    {
+      "left": "China",
+      "right": "Beijing"
+    },
+    {
+      "left": "India",
+      "right": "New Delhi"
+    },
+    {
+      "left": "South Korea",
+      "right": "Seoul"
+    },
+    {
+      "left": "Thailand",
+      "right": "Bangkok"
+    },
+    {
+      "left": "Egypt",
+      "right": "Cairo"
+    }
+  ],
+  "additionalRightItem": "Montevideo"
+} 

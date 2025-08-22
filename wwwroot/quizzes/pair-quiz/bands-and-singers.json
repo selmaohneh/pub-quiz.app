@@ -1,0 +1,109 @@
+{
+  "title": "Bands and Front Singers",
+  "leftLabel": "Bands",
+  "rightLabel": "Front Singers",
+  "description": "Match each famous band with their iconic front singer or lead vocalist. One extra singer is included to make the last match challenging!",
+  "pairs": [
+    {
+      "left": "Queen",
+      "right": "Freddie Mercury"
+    },
+    {
+      "left": "The Beatles",
+      "right": "John Lennon"
+    },
+    {
+      "left": "Led Zeppelin",
+      "right": "Robert Plant"
+    },
+    {
+      "left": "The Rolling Stones",
+      "right": "Mick Jagger"
+    },
+    {
+      "left": "Nirvana",
+      "right": "Kurt Cobain"
+    },
+    {
+      "left": "U2",
+      "right": "Bono"
+    },
+    {
+      "left": "Coldplay",
+      "right": "Chris Martin"
+    },
+    {
+      "left": "Radiohead",
+      "right": "Thom Yorke"
+    },
+    {
+      "left": "Red Hot Chili Peppers",
+      "right": "Anthony Kiedis"
+    },
+    {
+      "left": "Pearl Jam",
+      "right": "Eddie Vedder"
+    },
+    {
+      "left": "Foo Fighters",
+      "right": "Dave Grohl"
+    },
+    {
+      "left": "Green Day",
+      "right": "Billie Joe Armstrong"
+    },
+    {
+      "left": "Linkin Park",
+      "right": "Chester Bennington"
+    },
+    {
+      "left": "Metallica",
+      "right": "James Hetfield"
+    },
+    {
+      "left": "AC/DC",
+      "right": "Brian Johnson"
+    },
+    {
+      "left": "Guns N' Roses",
+      "right": "Axl Rose"
+    },
+    {
+      "left": "Bon Jovi",
+      "right": "Jon Bon Jovi"
+    },
+    {
+      "left": "The Doors",
+      "right": "Jim Morrison"
+    },
+    {
+      "left": "Pink Floyd",
+      "right": "Roger Waters"
+    },
+    {
+      "left": "Black Sabbath",
+      "right": "Ozzy Osbourne"
+    },
+    {
+      "left": "The Who",
+      "right": "Roger Daltrey"
+    },
+    {
+      "left": "Aerosmith",
+      "right": "Steven Tyler"
+    },
+    {
+      "left": "Journey",
+      "right": "Steve Perry"
+    },
+    {
+      "left": "R.E.M.",
+      "right": "Michael Stipe"
+    },
+    {
+      "left": "Oasis",
+      "right": "Liam Gallagher"
+    }
+  ],
+  "additionalRightItem": "David Lee Roth"
+} 

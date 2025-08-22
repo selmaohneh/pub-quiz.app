@@ -119,3 +119,48 @@ public class LieGameState
     public string Question { get; set; } = string.Empty;
     public int SecondsUntilNextItem { get; set; } = 10;
 }
+
+// Pair Quiz Models
+public class PairQuizData
+{
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = string.Empty;
+
+    [JsonPropertyName("leftLabel")]
+    public string LeftLabel { get; set; } = string.Empty;
+
+    [JsonPropertyName("rightLabel")]
+    public string RightLabel { get; set; } = string.Empty;
+
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = string.Empty;
+
+    [JsonPropertyName("pairs")]
+    public List<PairQuizPair> Pairs { get; set; } = new();
+
+    [JsonPropertyName("additionalRightItem")]
+    public string AdditionalRightItem { get; set; } = string.Empty;
+}
+
+public class PairQuizPair
+{
+    [JsonPropertyName("left")]
+    public string Left { get; set; } = string.Empty;
+
+    [JsonPropertyName("right")]
+    public string Right { get; set; } = string.Empty;
+}
+
+public class PairGameState
+{
+    public List<string> LeftItems { get; set; } = new();
+    public List<string> RightItems { get; set; } = new();
+    public List<PairQuizPair> CorrectPairs { get; set; } = new();
+    public List<PairQuizPair> MatchedPairs { get; set; } = new();
+    public bool GameEnded { get; set; }
+    public bool GameWon { get; set; }
+    public string? SelectedLeftItem { get; set; }
+    public string? SelectedRightItem { get; set; }
+    public string? IncorrectLeftItem { get; set; }
+    public string? IncorrectRightItem { get; set; }
+}
