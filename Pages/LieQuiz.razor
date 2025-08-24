@@ -168,6 +168,13 @@
                     <h3>@(_gameState.WasCorrectGuess ? (_gameState.PlayerGuessedLie ? "Correct! It was a lie! 🎉" : "Correct! It was true! ✅") : (_gameState.PlayerGuessedLie ? "Wrong! It was actually true! 😔" : "Missed! It was a lie! 😔"))</h3>
                 </div>
                 
+                @if (!string.IsNullOrEmpty(_gameState.BuzzedLetter))
+                {
+                    <div class="buzzed-letter-display">
+                        <h4>🎯 Team <span class="letter-highlight">@_gameState.BuzzedLetter</span> @(_gameState.WasCorrectGuess ? "was correct!" : "was wrong!")</h4>
+                    </div>
+                }
+                
                 <div class="result-details">
                     <div class="item-info">
                         <h4>@_gameState.CurrentItem?.Name</h4>
