@@ -75,6 +75,7 @@ public class YearGameState
     public double ProgressPercentage { get; set; }
     public int SecondsUntilRangeIncrease { get; set; } = 10;
     public bool RangeJustUpdated { get; set; }
+    public string BuzzedLetter { get; set; } = string.Empty;
 }
 
 // Lie Quiz Models
@@ -118,6 +119,7 @@ public class LieGameState
     public bool AllLiesFound { get; set; }
     public string Question { get; set; } = string.Empty;
     public int SecondsUntilNextItem { get; set; } = 10;
+    public string BuzzedLetter { get; set; } = string.Empty;
 }
 
 // Pair Quiz Models

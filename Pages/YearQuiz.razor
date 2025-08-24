@@ -30,7 +30,7 @@
                         <span class="rule-icon">👥</span>
                         <div class="rule-content">
                             <h4>Team Competition</h4>
-                            <p>Teams compete to be the first to press "Stop & Guess" when they think they know the year.</p>
+                            <p>Teams compete to be the first to press any letter key (A-Z) when they think they know the year. Each team should have their own letter!</p>
                         </div>
                     </div>
                     <div class="rule-item">
@@ -107,7 +107,7 @@
                         <span class="step-number">3</span>
                         <div class="step-content">
                             <h4>Upload and play</h4>
-                            <p>Watch the timer and press "Stop & Guess" when you're ready to make your guess!</p>
+                            <p>Watch the timer and press any letter key when you're ready to make your guess!</p>
                             <button class="btn btn-success" @onclick="TriggerFileUpload">Upload and Play</button>
                             <InputFile @ref="fileInput" OnChange="HandleFileUpload" accept=".json" style="display: none;" />
                         </div>
@@ -168,6 +168,13 @@
                 <div class="range-display">
                     <h3>Your range: ±@_gameState.CurrentRange</h3>
                 </div>
+                
+                @if (!string.IsNullOrEmpty(_gameState.BuzzedLetter))
+                {
+                    <div class="buzzed-letter-display">
+                        <h4>🎯 Team <span class="letter-highlight">@_gameState.BuzzedLetter</span> buzzed first!</h4>
+                    </div>
+                }
                 
                 <div class="event-title">
                     <h2>@_gameState.CurrentItem?.Title</h2>
@@ -388,6 +395,37 @@
         gap: 1rem;
         justify-content: center;
         margin-top: 2rem;
+    }
+
+    .buzzed-letter-display {
+        text-align: center;
+        margin: 1rem 0;
+        padding: 1rem;
+        background: linear-gradient(135deg, #28a745, #20c997);
+        border-radius: 8px;
+        color: white;
+        animation: buzzer-pulse 0.5s ease-in-out;
+    }
+
+    .buzzed-letter-display h4 {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: bold;
+    }
+
+    .letter-highlight {
+        font-size: 1.5em;
+        font-weight: bold;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.2em 0.4em;
+        border-radius: 6px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    @@keyframes buzzer-pulse {
+        0% { transform: scale(0.9); opacity: 0; }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); opacity: 1; }
     }
     
     /* How to Play Section Styles */
@@ -651,7 +689,8 @@
             CurrentRange = 0,
             GameStarted = true,
             GameStartTime = DateTime.Now,
-            LastRangeUpdateTime = DateTime.Now
+            LastRangeUpdateTime = DateTime.Now,
+            BuzzedLetter = string.Empty
         };
 
         StartGameTimer();
@@ -660,8 +699,10 @@
     [JSInvokable]
     public async Task HandleKeyPress(string key)
     {
-        if (!_gameState.GameEnded && !_gameState.GameStopped && (key == " " || key == "Enter"))
+        // Check if it's a letter key and game is active
+        if (!_gameState.GameEnded && !_gameState.GameStopped && key.Length == 1 && char.IsLetter(key[0]))
         {
+            _gameState.BuzzedLetter = key.ToUpper();
             StopGame();
             await InvokeAsync(StateHasChanged);
         }
@@ -834,6 +875,7 @@
             _gameState.ProgressPercentage = 0;
             _gameState.GameStartTime = DateTime.Now;
             _gameState.LastRangeUpdateTime = DateTime.Now;
+            _gameState.BuzzedLetter = string.Empty;
             _yearGuessInput = 0;
             
             StartGameTimer();

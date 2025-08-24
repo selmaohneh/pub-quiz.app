@@ -11,7 +11,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg?v=1" />
     <link rel="icon" type="image/png" href="favicon.png?v=1" />
     <link href="pub-quiz.styles.css" rel="stylesheet" />
-    <script defer data-domain="pub-quiz.io" src="https://plausible.io/js/script.tagged-events.js"></script>
+    <script defer data-domain="pub-quiz.app" src="https://plausible.io/js/script.tagged-events.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5845633849679297"
      crossorigin="anonymous"></script>
 </head>
@@ -199,13 +199,14 @@
         window.addKeyboardListeners = (component) => {
             yearQuizComponent = component;
             keyboardListener = (event) => {
-                if (event.key === ' ' || event.key === 'Enter') {
-                    // Prevent default behavior for space (scrolling) and enter
-                    if (event.key === ' ' && event.target.tagName !== 'INPUT') {
-                        event.preventDefault();
-                    }
+                // Check if it's a letter key (a-z, A-Z)
+                const isLetter = /^[a-zA-Z]$/.test(event.key);
+                
+                if (isLetter && event.target.tagName !== 'INPUT') {
+                    // Prevent default behavior for letter keys when not in an input
+                    event.preventDefault();
                     if (yearQuizComponent) {
-                        yearQuizComponent.invokeMethodAsync('HandleKeyPress', event.key);
+                        yearQuizComponent.invokeMethodAsync('HandleKeyPress', event.key.toUpperCase());
                     }
                 }
             };

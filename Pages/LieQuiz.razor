@@ -13,7 +13,7 @@
     {
         <div class="quiz-setup">
             <h2>🤥 Who Lies?</h2>
-            <p class="lead">Spot the lies among the truths! Press space or enter when you see something that doesn't belong.</p>
+            <p class="lead">Spot the lies among the truths! Press any letter key when you see something that doesn't belong.</p>
             
             <!-- How to Play Section -->
             <div class="how-to-play-section">
@@ -30,7 +30,7 @@
                         <span class="rule-icon">👥</span>
                         <div class="rule-content">
                             <h4>Team Competition</h4>
-                            <p>Teams compete to be the first to click "That's a Lie!" when they spot a false statement.</p>
+                            <p>Teams compete to be the first to press any letter key (A-Z) when they spot a false statement. Each team should have their own letter!</p>
                         </div>
                     </div>
                     <div class="rule-item">
@@ -107,7 +107,7 @@
                         <span class="step-number">3</span>
                         <div class="step-content">
                             <h4>Upload and play</h4>
-                            <p>Items appear every 10 seconds. Press Space, Enter, or click "That's a Lie!" when you spot a false statement!</p>
+                            <p>Items appear every 10 seconds. Press any letter key or click "That's a Lie!" when you spot a false statement!</p>
                             <button class="btn btn-success" @onclick="TriggerFileUpload">Upload and Play</button>
                             <InputFile @ref="fileInput" OnChange="HandleFileUpload" accept=".json" style="display: none;" />
                         </div>
@@ -140,6 +140,13 @@
                 <div class="current-item">
                     <h1>@_gameState.CurrentItem?.Name</h1>
                 </div>
+                
+                @if (!string.IsNullOrEmpty(_gameState.BuzzedLetter))
+                {
+                    <div class="buzzed-letter-display">
+                        <h4>🎯 Team <span class="letter-highlight">@_gameState.BuzzedLetter</span> called it a lie!</h4>
+                    </div>
+                }
                 
                 <div class="countdown-container">
                     <div class="countdown-text">
@@ -451,6 +458,37 @@
         color: rgba(255, 255, 255, 0.9);
         line-height: 1.5;
     }
+
+    .buzzed-letter-display {
+        text-align: center;
+        margin: 1rem 0;
+        padding: 1rem;
+        background: linear-gradient(135deg, #28a745, #20c997);
+        border-radius: 8px;
+        color: white;
+        animation: buzzer-pulse 0.5s ease-in-out;
+    }
+
+    .buzzed-letter-display h4 {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: bold;
+    }
+
+    .letter-highlight {
+        font-size: 1.5em;
+        font-weight: bold;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.2em 0.4em;
+        border-radius: 6px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    @@keyframes buzzer-pulse {
+        0% { transform: scale(0.9); opacity: 0; }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); opacity: 1; }
+    }
     
     @@media (max-width: 768px) {
         .how-to-play-section {
@@ -649,7 +687,8 @@
             Question = _quizData.Question,
             TotalLies = _quizData.Items.Count(x => x.IsLie),
             ItemStartTime = DateTime.Now,
-            SecondsUntilNextItem = 10
+            SecondsUntilNextItem = 10,
+            BuzzedLetter = string.Empty
         };
 
         StartGameTimer();
@@ -661,8 +700,10 @@
     [JSInvokable]
     public async Task HandleKeyPress(string key)
     {
-        if (!_gameState.GameEnded && !_gameState.ShowResult && (key == " " || key == "Enter"))
+        // Check if it's a letter key and game is active
+        if (!_gameState.GameEnded && !_gameState.ShowResult && key.Length == 1 && char.IsLetter(key[0]))
         {
+            _gameState.BuzzedLetter = key.ToUpper();
             GuessLie();
             await InvokeAsync(StateHasChanged);
         }
@@ -770,6 +811,7 @@
     {
         _gameState.ShowResult = false;
         _gameState.PlayerGuessedLie = false;
+        _gameState.BuzzedLetter = string.Empty;
 
         SelectNextItem();
         
@@ -786,7 +828,7 @@
         {
             Title = "Disney Characters",
             Question = "I live in Entenhausen",
-            Description = "Spot the lies among the truths! Most items are true, but some are lies. Press Space, Enter, or click 'That's a Lie!' when you spot something false.",
+            Description = "Spot the lies among the truths! Most items are true, but some are lies. Press any letter key or click 'That's a Lie!' when you spot something false.",
             Items = new List<LieQuizItem> 
             { 
                 new() { Name = "Donald Duck", IsLie = false },
